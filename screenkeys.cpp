@@ -15,6 +15,7 @@ screenkeys::screenkeys()
 	_cursor_y = 0;
 	_rotation = 0;
 	_textsize = 1;
+	_txtColour = 0;//black
 	_wrap = true;
 
 }
@@ -345,4 +346,21 @@ void screenkeys::writeBitmap(uint8_t x,uint8_t y,const unsigned char* bmp,uint16
 void screenkeys::printChar(uint8_t x, uint8_t y, unsigned char c,uint8_t colour,uint8_t sze) {
 	c -= pgm_read_byte(_font+2);
 	writeBitmap(x,y,_font,(c*pgm_read_byte(_font + 1))+3,pgm_read_byte(_font),pgm_read_byte(_font+1),colour,sze);
+}
+
+size_t screenkeys::write(uint8_t c) {
+	if (c == '\n') {
+		_cursor_y += _textsize*8;
+		_cursor_x  = 0;
+	} else if (c == '\r') {
+    // skip em
+	} else {
+		printChar(_cursor_x, _cursor_y, c, _txtColour, _textsize);
+		_cursor_x += _textsize*6;
+		if (_wrap && (_cursor_x > (_width - _textsize*6))) {
+			_cursor_y += _textsize*8;
+			_cursor_x = 0;
+		}
+	}
+	return 1;
 }

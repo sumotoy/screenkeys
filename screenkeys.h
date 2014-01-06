@@ -42,6 +42,7 @@ Version history:
 
 #include <inttypes.h>
 #include <Arduino.h>
+#include "Print.h"
 
 #define swap(a, b) { int8_t t = a; a = b; b = t; }
 
@@ -59,7 +60,7 @@ Version history:
 //#define TR_ORIGIN
 
 
-class screenkeys {
+class screenkeys : public Print {
 
 public:
 	screenkeys( );
@@ -83,6 +84,8 @@ public:
 	void 			setFont(const unsigned char * f);
 	
 	void 			printChar(uint8_t x, uint8_t y, unsigned char c,uint8_t colour,uint8_t sze);
+	virtual size_t  write(uint8_t);
+
 protected:
 	uint8_t 		_width;
 	uint8_t 		_height;
@@ -90,6 +93,7 @@ protected:
 	uint8_t 		_cursor_y;
 	uint8_t 		_rotation;
 	uint8_t 		_textsize;
+	uint8_t			_txtColour;
 	boolean 		_wrap;
 	uint8_t 		_XRES;
 	uint8_t 		_YRES;
