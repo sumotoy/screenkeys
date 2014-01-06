@@ -4,32 +4,32 @@ screenkeys
 Hardware & Software for drive 1..64 LCD Screenkeys LC button with Teensy3.x<br>
 ![Alt text](http://i1189.photobucket.com/albums/z437/theamra/libraries/e1564993-de34-4369-8f7f-b6e67d567249.jpg "LC16")<br>
 
-What is a Screenkey?
+<b>What is a Screenkey?</b><br>
 
 Screenkey it's a button with an LCD incorporated from a company called Screenkeys, not easy to find in the consumer market since they are very expensive but very popular in big video studios and avionics.<br>
 Using a tiny LCD inside a momentary button require at list a microcontroller and thanks to their miniaturization the access it's not so easy as supposed. I've managed to hack only LC16 and LC24 and they are both 6 pin devices, just 2 wires need to be individually managed.<br>
-First 2 problem it's that uses syncronous programming and clock needs to be constantly feeded to all devices or they get quickly damaged!<br>
-Another headache it's the protocol, easy but uses a weird prity bit that need to be constantly calculated and can be even or odd (depends of the command)<br>
-The last problem it's how to manage many of these little beasts without dedicate tons of hardware and microcontroller resources.<br>
-Taked a look around...Just one guy writed something barely usable but works only for a button, code was more an experiment and refresh frequency was so low that the key will be damaged in less than one year.<br>
-The company has some documentation based on old microcontrollers and uses shift registers that I try to avoid because they mostly create interferences with audio (if a panel like this it's uses in analogic contest).<br>
-I got some hundreds of these keys from an auction so I decided to write my way to use them.
-Forget Arduino uno et similar, they simply have insufficent resources, so I choosed one
-of my preferred Micro around, Teensy3.x from <b>Paul Stoffregen</b> http://www.pjrc.com/store/teensy3.html that it's a 32bit
-tiny microcontroller with a lot of features and much better supported than Arduino Due that it's gigantic, less powerful and expensive.<br>
-I've used several SPI GPIO's from Microchip MCP23s17 with theyr exclusive HAEN feature to save pins and my universal
-GPIO library, together with a couple of level converter chip and a driver plus some condenser and resistors. Schematics will be published soon but it's surprisely uncomplicated even for 64 buttons. I have choosed single button scan and not a matrix (that uses much less gpio's) because I want to keep the ability to identify multiple buttons at once.
-With this hardware you have a choose to use internal generated microcontroller lcd clock generation or even use an external one to save a pin and some CPU resources.<br>
-I have tested library and hardware with 48 switches and works like a charm, it can support max 64 switches.
-With 48 switches (this means 48 tiny LCD screens!!!) Teensy3 resources are used at 1% since I'm using as much I can hardware features
-of this chip, for example key scan it's triggered by an IRQ so if you are not touching keyboard the cpu loop it's almost empty
-and can be used for many other useful and fun stuff.<br>
-I choosed a clock frequency of 1Mhz to prevent interferences with audio if you plan to use as interface for audio stuff.
-The library will initially works with LC16 and LC24 series (I just have these) but can be expanded for other models.
-Be free to use for your purposes but not for any commercial or military applications.
--------------------------------------------------------------------<br>
+First 2 problems: they uses syncronous programming and clock needs to be constantly feeded to all devices or they get quickly damaged...<br>
+Another headache it's the protocol, easy, but uses a weird parity bit that need to be constantly calculated and can be even or odd (depends of the command)<br>
+The last problem it's how to manage many of these little beasts without dedicate tons of hardware and microcontroller resources.<br><br>
+Taked a look around...Just one guy writed something barely usable but works only for a button, code was more an experiment and refresh frequency was so low that the key will be damaged in less than one year.<br><br>
+The company has some documentation based on old microcontrollers and uses shift registers that I'm try to avoid because they easily inject interferences in audio.<br>
+I got some hundreds of these keys from an auction so I decided to design something.<br>
 
-Features:<br>
+<b>Design:</b><br>
+
+Forget Arduino uno et similar, they simply have insufficent resources, so I choosed one
+of my preferred Micro around, Teensy3.x from <b>Paul Stoffregen</b> http://www.pjrc.com/store/teensy3.html that it's a 32bit tiny microcontroller with a lot of features and much better supported than gigantic and expensive Arduino Due.<br>
+To get around the clock problem and syncro program I choosed to use 2 clocks that can be switched automatically by microcontroller and it worked well. Then I decided to use some SPI 16bit gpio's from Microchip, the MCP23s17 that it's faster than SR and uses a unique feature called HAEN that le me share all pins between chips so only 3 pins are needed for detecting 64 switches individually and I have the data line for each switch as well. For this purpose I coded recently a library here that let me drive many of those chips. I just added a couple of buffers for the clock and a level translator for Teensy3.<br>
+I choosed a refreshing clock between 500Khz to 2Mhz, a task that for Teesy3 it's pretty easy but I got the same results even if I tried to use a dedicated oscillator, just need to inform Micro at what speed I'm driving LCD's.<br>
+
+<b>Experiments:</b><br>
+
+I have tested library and hardware with 48 switches and works like a charm, it can support max 64 switches.
+With 48 switches (this means 48 tiny LCD screens!!!) Teensy3 resources are used at 1 to 5%, not bad and I was right to choose the direct switch identification instead of a matrix, for the price of these switches I really need multiple key ident, not possible with matrix (oops, possibly but with several restrictions)<br>
+
+-----------------------------------------------------------------------------------------<br>
+
+<b>Features:</b><br>
 
 - 64 x LC16.2 LCD-Buttons supported by 6/7 wires.
 - Small microcontroller resources footprint.
@@ -40,8 +40,9 @@ Features:<br>
 - Can be splitted in boards of 16 Switches.
 - Can send/receive infos in I2C,RS485,Ethernet or as USB Hid/Keyboard trough Teensy3 programming.
 - Interfacing with 3V3 or 5V systems.
+- Identify multiple buttons pressed.
 
-FAQ:<br>
+<b>FAQ:</b><br>
 
 - Library works 'out of the box'? Just connect the switch? NO! Needs specific hardware (still not published).
 - How many switches support? 64 Max.
