@@ -1,0 +1,49 @@
+#######################################
+# Syntax Coloring Map For screenkeys
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+screenkeys	KEYWORD1
+LC16	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin	KEYWORD2
+getWidth	KEYWORD2
+getHeight	KEYWORD2
+getRotation	KEYWORD2
+setRotation	KEYWORD2
+drawPixel	KEYWORD2
+drawLine	KEYWORD2
+drawFastVLine	KEYWORD2
+drawFastHLine	KEYWORD2
+drawRect	KEYWORD2
+fillRect	KEYWORD2
+drawCircle	KEYWORD2
+fillCircle	KEYWORD2
+drawRoundRect	KEYWORD2
+fillRoundRect	KEYWORD2
+setFont	KEYWORD2
+refresh	KEYWORD2
+setColor	KEYWORD2
+fill	KEYWORD2
+clear	KEYWORD2
+printImage	KEYWORD2
+
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+BL_NONE	LITERAL1
+BR_GREEN	LITERAL1
+BR_RED	LITERAL1
+BR_ORANGE	LITERAL1
+DK_GREEN	LITERAL1
+DK_RED	LITERAL1
+DK_ORANGE	LITERAL1
