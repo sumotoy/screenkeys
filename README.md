@@ -46,3 +46,4 @@ FAQ:<br>
 - How many switches support? 64 Max.
 - Can work with other Microcontrollers? Probably yes but was intended only for Teensy3.
 
+For commercial purposes and licence questions please contact me.
