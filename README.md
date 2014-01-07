@@ -15,12 +15,18 @@ Taked a look around...Just one guy writed something barely usable but works only
 The company has some documentation based on old microcontrollers and uses shift registers that I'm try to avoid because they easily inject interferences in audio.<br>
 I got some hundreds of these keys from an auction so I decided to design something.<br>
 
-<b>Design:</b><br>
+<b>Hardware Design:</b><br>
 
 Forget Arduino uno et similar, they simply have insufficent resources, so I choosed one
 of my preferred Micro around, Teensy3.x from <b>Paul Stoffregen</b> http://www.pjrc.com/store/teensy3.html that it's a 32bit tiny microcontroller with a lot of features and much better supported than gigantic and expensive Arduino Due.<br>
 To get around the clock problem and syncro program I choosed to use 2 clocks that can be switched automatically by microcontroller and it worked well. Then I decided to use some SPI 16bit gpio's from Microchip, the MCP23s17 that it's faster than SR and uses a unique feature called HAEN that le me share all pins between chips so only 3 pins are needed for detecting 64 switches individually and I have the data line for each switch as well. For this purpose I coded recently a library here that let me drive many of those chips. I just added a couple of buffers for the clock and a level translator for Teensy3.<br>
 I choosed a refreshing clock between 500Khz to 2Mhz, a task that for Teesy3 it's pretty easy but I got the same results even if I tried to use a dedicated oscillator, just need to inform Micro at what speed I'm driving LCD's.<br>
+
+<b>Software Design:</b><br>
+
+Since many switches can be used I choosed to working with just one display buffer (64 bytes,512bits) that can be changed on the fly and sent to every LCD. For this reason the library has the main graphic methods that are common for every display and a child of the same library has the specific commands to inject code into display every display, this method give me also the ability to extend the display types easily. The LCD works in 'graphic' mode so text and graphic can be mixed.<br>
+Graphics methods works around a pixel engine that write directly into the buffer and have rotation and origin-change capabilities, this to have the maximum flexibility if you plan to put display in vertical or you turned it upside down.<br>
+
 
 <b>Experiments:</b><br>
 
