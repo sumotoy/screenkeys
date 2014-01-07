@@ -52,7 +52,7 @@ private:
 	uint8_t 		_units;
 	uint8_t 		_error;
 	uint8_t			_chips;
-
+	/*
 	uint8_t 		_buffer[64] = { 
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -63,6 +63,7 @@ private:
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
+*/
 	mcp23s17		mcp;
 	void 			progEnable(boolean mode);
 	void 			PClock(uint8_t cTicks);
@@ -71,6 +72,7 @@ private:
 	void 			stop(uint8_t key);
 	void 			sendByte(uint8_t key,byte reg,byte val);
 	void 			sendWord(uint8_t key,byte reg,byte val1,byte val2);
-	void 			sk_initialize(uint8_t key);
+	void 			init_lcdChip(uint8_t key);
+
 };
 #endif

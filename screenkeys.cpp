@@ -3,9 +3,11 @@
 #include <inttypes.h>
 
 #include <Arduino.h>
-
-
 #include "screenkeys.h"
+
+#include "glcdfont.c"
+
+#define pgm_read_byte(addr) (*(const unsigned char *)(addr))
 
 screenkeys::screenkeys() 
 {
@@ -17,10 +19,16 @@ screenkeys::screenkeys()
 	_textsize = 1;
 	_txtColour = 0;//black
 	_wrap = true;
-
+	clearBuffer();
+	_bufferAddressing = DEFAULT_BUFFER_ADDRESSING;
 }
 
+void screenkeys::clearBuffer() {
+	for (uint8_t i=0;i<64;i++){
+		_buffer[i] = 0x00;
+	}	
 
+}
 
 uint8_t screenkeys::getWidth(void) {
   return _width;
@@ -34,6 +42,18 @@ uint8_t screenkeys::getRotation(void) {
   return _rotation;
 }
 
+void screenkeys::setTextWrap(boolean w) {
+  _wrap = w;
+}
+
+void screenkeys::setTextSize(uint8_t s) {
+  _textsize = (s > 0) ? s : 1;
+}
+
+void screenkeys::setTextColor(uint8_t c) {
+	if (c > 1) c = 1;
+	_txtColour = c;
+}
 
 void screenkeys::setRotation(uint8_t val) {
   _rotation = (val & 3);
@@ -70,7 +90,7 @@ void screenkeys::drawPixel(uint8_t x, uint8_t y, uint8_t color) {
 		break;
   }  
   //pixel engine can be referenced from any angle of the LCD
-#if defined(TL_ORIGIN)
+	if (_bufferAddressing == TL_ORIGIN){
   //0,0 on the Top Left
 	if (x < 8) {
 		xbyte = 0;
@@ -86,7 +106,7 @@ void screenkeys::drawPixel(uint8_t x, uint8_t y, uint8_t color) {
 	} else {
 		bitClear(_buffer[xbyte+(y*4)],x-(xbyte*8));
 	}
-#elif defined(BR_ORIGIN)
+	} else if (_bufferAddressing == BR_ORIGIN){
   //0,0 on Bottom Right
 	if (x < 8) {
 		xbyte = 63;
@@ -102,7 +122,7 @@ void screenkeys::drawPixel(uint8_t x, uint8_t y, uint8_t color) {
 	} else {
 		bitClear(_buffer[xbyte-(y*4)],(7-x)-((xbyte-63)*8));
 	}
-#elif defined(BL_ORIGIN)
+	} else if (_bufferAddressing == BL_ORIGIN){
   //0,0 on Bottom Left
 	if (x < 8) {
 		xbyte = 60;
@@ -118,7 +138,7 @@ void screenkeys::drawPixel(uint8_t x, uint8_t y, uint8_t color) {
 	} else {
 		bitClear(_buffer[xbyte-(y*4)],x-((xbyte-60)*8));
 	}
-#elif defined(TR_ORIGIN)
+	} else {//TR_ORIGIN
   //0,0 on Top Right
 	if (x < 8) {
 		xbyte = 3;
@@ -134,9 +154,7 @@ void screenkeys::drawPixel(uint8_t x, uint8_t y, uint8_t color) {
 	} else {
 		bitClear(_buffer[xbyte+(y*4)],(7-x)-((xbyte-3)*8));
 	}
-#else
-#error you should define a method!
-#endif
+	}
 }
 
 void screenkeys::drawLine(uint8_t x0,uint8_t y0,uint8_t x1,uint8_t y1,uint8_t color) {
@@ -319,8 +337,15 @@ void screenkeys::fillRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16
 	fillCircleHelper(x+r    , y+r, r, 2, h-2*r-1, color);
 }
 
+
+/*
 void screenkeys::setFont(const unsigned char * f) {
 	_font = f;
+}
+
+
+void screenkeys::inc_txtline() {
+	_cursor_y -= pgm_read_byte(_font+1);
 }
 
 void screenkeys::writeBitmap(uint8_t x,uint8_t y,const unsigned char* bmp,uint16_t i,uint8_t wi,uint8_t he,uint8_t colour,uint8_t sze) {
@@ -349,16 +374,80 @@ void screenkeys::printChar(uint8_t x, uint8_t y, unsigned char c,uint8_t colour,
 }
 
 size_t screenkeys::write(uint8_t c) {
+	switch(c) {
+		case '\0':			//null
+			break;
+		case '\n':			//line feed
+			_cursor_x = 0;
+			inc_txtline();
+			break;
+		case 8:				//backspace
+			_cursor_x -= pgm_read_byte(_font);
+			printChar(_cursor_x,_cursor_y,' ',_txtColour,_textsize);
+			break;
+		case 13:			//carriage return !?!?!?!VT!?!??!?!
+			_cursor_x = 0;
+			break;
+		case 14:			//form feed new page(clear screen)
+			//clear_screen();
+			break;
+		default:
+			if (_cursor_x >= ((_YRES *8 ) - pgm_read_byte(_font))) {
+				_cursor_x = 0;
+				inc_txtline();
+				printChar(_cursor_x,_cursor_y,c,_txtColour,_textsize);
+			} else {
+				printChar(_cursor_x,_cursor_y,c,_txtColour,_textsize);
+			}
+			_cursor_x += pgm_read_byte(_font);
+	}
+	return 1;
+}
+*/
+
+
+void screenkeys::setCursor(uint8_t x, uint8_t y) {
+	_cursor_x = x;
+	_cursor_y = y;
+}
+
+
+void screenkeys::drawChar(uint8_t x, uint8_t y, unsigned char c, uint8_t color, uint8_t size) {
+	// Clip right // Clip bottom  // Clip left  // Clip top
+  if ((x >= _width) || (y >= _height) || ((x + 6 * size - 1) < 0) || ((y + 8 * size - 1) < 0)) return;
+  _bufferAddressing = TL_ORIGIN;//adafruit glcd fonts use this method or will be reversed
+  for (uint8_t i = 0;i < 6;i++) {
+		uint8_t line;
+		if (i == 5) {
+			line = 0x0;
+		} else {
+			line = pgm_read_byte(font+(c*5)+i);
+		}
+		for (uint8_t j = 0; j<8; j++) {
+			if (line & 0x1) {
+				if (size == 1) {
+					drawPixel(x+i, y+j, color);
+				} else {  // big size
+					fillRect(x+(i*size), y+(j*size), size, size, color);
+				} 
+			}
+			line >>= 1;
+		}
+	}
+	_bufferAddressing = DEFAULT_BUFFER_ADDRESSING;//go back to choosed addressing
+}
+
+size_t screenkeys::write(uint8_t c) {
 	if (c == '\n') {
-		_cursor_y += _textsize*8;
+		_cursor_y += _textsize * 8;
 		_cursor_x  = 0;
 	} else if (c == '\r') {
     // skip em
 	} else {
-		printChar(_cursor_x, _cursor_y, c, _txtColour, _textsize);
-		_cursor_x += _textsize*6;
-		if (_wrap && (_cursor_x > (_width - _textsize*6))) {
-			_cursor_y += _textsize*8;
+		drawChar(_cursor_x, _cursor_y, c, _txtColour, _textsize);
+		_cursor_x += _textsize * 6;
+		if (_wrap && (_cursor_x > (_width - (_textsize * 6)))) {
+			_cursor_y += _textsize * 8;
 			_cursor_x = 0;
 		}
 	}

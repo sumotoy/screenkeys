@@ -52,7 +52,7 @@ void LC16::begin(bool protocolInitOverride) {
 		mcp.gpioPort(0xFFFF);
 		analogWriteFrequency(_mainClock, CLK_FRQ);
 		analogWrite(_mainClock,120);
-		sk_initialize(0);
+		init_lcdChip(0);
 	}
 }
 
@@ -152,7 +152,7 @@ void LC16::sendWord(uint8_t key,byte reg,byte val1,byte val2){
 	stop(key);
 }
 
-void LC16::sk_initialize(uint8_t key){
+void LC16::init_lcdChip(uint8_t key){
   _width = XRES;
   _height = YRES;
   _cursor_x = 0;
@@ -166,6 +166,7 @@ void LC16::sk_initialize(uint8_t key){
   clear(key);
   refresh(key);
   setColor(key,BL_NONE);
+  delay(100);
 }
 
 void LC16::refresh(uint8_t key){
@@ -188,13 +189,13 @@ void LC16::setColor(uint8_t key,byte color){
 
 
 void LC16::fill(uint8_t key,uint8_t color){
-	unsigned char col = 0x00;
-	if (color != 0) col = 0xFF;
+	unsigned char col = 0xFF;
+	if (color != 0) col = 0x00;
 	for (uint8_t i=0; i<64; i++){
 		_buffer[i] = col;
 	}
 }
 
 void LC16::clear(uint8_t key){
-	fill(key,0);
+	fill(key,1);
 }

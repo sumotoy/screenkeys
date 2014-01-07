@@ -8,7 +8,7 @@
 	screenkeys - A Library and Hardware (For Teensy3.x) to drive 1..64 LCD ScreenKeys buttons with 6..7 wires
 ---------------------------------------------------------------------------------------------------------------------
 Version history:
-0.3a1: alpha version, still in deep changes
+0.3a2: alpha version, still in deep changes
 ---------------------------------------------------------------------------------------------------------------------
 		Copyright (c) 2014, s.u.m.o.t.o.y [sumotoy(at)gmail.com]
 ---------------------------------------------------------------------------------------------------------------------
@@ -46,19 +46,19 @@ Version history:
 
 #define swap(a, b) { int8_t t = a; a = b; b = t; }
 
-/*
-#ifdef __AVR__
- #include <avr/pgmspace.h>
-#else
- #define pgm_read_byte(addr) (*(const unsigned char *)(addr))
-#endif
-*/
+//Pixel engine write directly in a buffer, here you can choose
+//the preferred method. Some font it's reversed or specular so the engine can
+//switch method on the fly and come back to the default method.
+//Do not touch these numbers
+#define TL_ORIGIN		0
+#define BR_ORIGIN		1
+#define BL_ORIGIN 		2//normal operations
+#define TR_ORIGIN		3
+//here you can choose the preferred origin buffer write method
+#define DEFAULT_BUFFER_ADDRESSING	BL_ORIGIN
 
-//#define TL_ORIGIN
-//#define BR_ORIGIN
-#define BL_ORIGIN //choose this !!!!
-//#define TR_ORIGIN
-
+#define BLACK 0
+#define WHITE 1
 
 class screenkeys : public Print {
 
@@ -69,21 +69,23 @@ public:
 	uint8_t 		getHeight(void);
 	uint8_t 		getRotation(void);
 	void 			setRotation(uint8_t val);
-	void 			drawPixel(uint8_t x, uint8_t y, uint8_t color);
-	void 			drawLine(uint8_t x0,uint8_t y0,uint8_t x1,uint8_t y1,uint8_t color);
-	void 			drawFastVLine(uint8_t x,uint8_t y,uint8_t h,uint8_t color);
-	void 			drawFastHLine(uint8_t x,uint8_t y,uint8_t w,uint8_t color);
-	void 			drawRect(uint8_t x,uint8_t y,uint8_t w,uint8_t h,uint8_t color);
-	void 			fillRect(uint8_t x,uint8_t y,uint8_t w,uint8_t h,uint8_t color);
+	void 			setTextWrap(boolean w);
+	void 			setTextSize(uint8_t s);
+	void 			setTextColor(uint8_t c);
+	void 			setCursor(uint8_t x, uint8_t y);
+	void 			drawPixel(uint8_t x, uint8_t y, uint8_t color=BLACK);
+	void 			drawLine(uint8_t x0,uint8_t y0,uint8_t x1,uint8_t y1,uint8_t color=BLACK);
+	void 			drawFastVLine(uint8_t x,uint8_t y,uint8_t h,uint8_t color=BLACK);
+	void 			drawFastHLine(uint8_t x,uint8_t y,uint8_t w,uint8_t color=BLACK);
+	void 			drawRect(uint8_t x,uint8_t y,uint8_t w,uint8_t h,uint8_t color=BLACK);
+	void 			fillRect(uint8_t x,uint8_t y,uint8_t w,uint8_t h,uint8_t color=BLACK);
 	
-	void 			drawCircle(uint8_t x0, uint8_t y0, uint16_t r,uint8_t color);
+	void 			drawCircle(uint8_t x0, uint8_t y0, uint16_t r,uint8_t color=BLACK);
 	
-	void 			fillCircle(uint8_t x0, uint8_t y0, uint16_t r,uint8_t color);
-	void 			drawRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16_t r, uint8_t color);
-	void 			fillRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16_t r, uint8_t color);
-	void 			setFont(const unsigned char * f);
-	
-	void 			printChar(uint8_t x, uint8_t y, unsigned char c,uint8_t colour,uint8_t sze);
+	void 			fillCircle(uint8_t x0, uint8_t y0, uint16_t r,uint8_t color=BLACK);
+	void 			drawRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16_t r, uint8_t color=BLACK);
+	void 			fillRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16_t r, uint8_t color=BLACK);
+	//void 			setFont(const unsigned char * f);
 	virtual size_t  write(uint8_t);
 
 protected:
@@ -97,12 +99,17 @@ protected:
 	boolean 		_wrap;
 	uint8_t 		_XRES;
 	uint8_t 		_YRES;
-	uint8_t 		_buffer[];
+	uint8_t 		_buffer[64];
+	uint8_t			_bufferAddressing;
 	const unsigned char * _font;
+	
+
 private:
 	void 			drawCircleHelper(uint8_t x0,uint8_t y0,uint8_t r,uint8_t cornername,uint8_t color);
 	void 			fillCircleHelper(uint8_t x0, uint8_t y0, uint16_t r, uint8_t cornername, int16_t delta, uint8_t color);
-	void 			writeBitmap(uint8_t x,uint8_t y,const unsigned char* bmp,uint16_t i,uint8_t wi,uint8_t he,uint8_t colour,uint8_t sze);
+	void 			drawChar(uint8_t x, uint8_t y, unsigned char c, uint8_t color, uint8_t size);
+	void 			inc_txtline();
+	void			clearBuffer();
 };
 
 #endif

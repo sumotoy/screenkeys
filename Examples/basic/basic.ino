@@ -2,6 +2,7 @@
 #include <mcp23s17.h>   // needed!
 #include <LC16.h>       // needed!
 
+
 // definitions -------------------
 #define   SWITCHES            16
 #define   CS_COMMON_PIN       10
@@ -27,6 +28,9 @@ unsigned char exit_img[64] = {
   0x04, 0x00, 0x00, 0x60,
   0x04, 0x00, 0x00, 0x40 }; 
   
+  //font8x8
+//font6x8
+//font4x6
 /*
 No of switches / CS pin / start address / prg clock pin / en clock pin
 Master clock pin it's defined in the library
@@ -37,7 +41,20 @@ void setup(){
   //Serial.begin(38400);
   lcdKeys.begin();//initialize all
   lcdKeys.setColor(0,BR_GREEN);//switch no,color
-  lcdKeys.printImage(0,exit_img);//switch no,image
+//  lcdKeys.printImage(0,exit_img);//switch no,image
+  //lcdKeys.setFont(font8x8);
+//  delay(1000);
+//  lcdKeys.clear(0);
+//  lcdKeys.refresh(0);
+  //lcdKeys.fillRect(0,0,31,15,0);
+  //lcdKeys.drawPixel(31,15);
+  lcdKeys.drawRect(0,0,31,15);
+lcdKeys.setCursor(5,5);
+lcdKeys.print("Ab12");
+//  lcdKeys.drawRect(0,0,15,15);
+//  lcdKeys.drawRect(16,0,6,15);
+//  lcdKeys.fillRect(16,0,6,8);
+  lcdKeys.refresh(0);
 }
 
 void loop() {
