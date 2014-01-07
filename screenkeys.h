@@ -8,7 +8,7 @@
 	screenkeys - A Library and Hardware (For Teensy3.x) to drive 1..64 LCD ScreenKeys buttons with 6..7 wires
 ---------------------------------------------------------------------------------------------------------------------
 Version history:
-0.3a2: alpha version, still in deep changes
+0.3a3: alpha version, still in deep changes
 ---------------------------------------------------------------------------------------------------------------------
 		Copyright (c) 2014, s.u.m.o.t.o.y [sumotoy(at)gmail.com]
 ---------------------------------------------------------------------------------------------------------------------
@@ -27,8 +27,9 @@ Version history:
     along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
 	Small code portions from Adafruit (Adafruit_GFX).
+	https://github.com/adafruit/Adafruit-GFX-Library
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	Version:0.3a1
+	Version:0.3a3
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	Attention! This library needs gpio_expander library
 	https://github.com/sumotoy/gpio_expander
@@ -73,18 +74,18 @@ public:
 	void 			setTextSize(uint8_t s);
 	void 			setTextColor(uint8_t c);
 	void 			setCursor(uint8_t x, uint8_t y);
-	void 			drawPixel(uint8_t x, uint8_t y, uint8_t color=BLACK);
-	void 			drawLine(uint8_t x0,uint8_t y0,uint8_t x1,uint8_t y1,uint8_t color=BLACK);
-	void 			drawFastVLine(uint8_t x,uint8_t y,uint8_t h,uint8_t color=BLACK);
-	void 			drawFastHLine(uint8_t x,uint8_t y,uint8_t w,uint8_t color=BLACK);
-	void 			drawRect(uint8_t x,uint8_t y,uint8_t w,uint8_t h,uint8_t color=BLACK);
-	void 			fillRect(uint8_t x,uint8_t y,uint8_t w,uint8_t h,uint8_t color=BLACK);
+	void 			drawPixel(uint8_t x, uint8_t y, bool color=BLACK);
+	void 			drawLine(uint8_t x0,uint8_t y0,uint8_t x1,uint8_t y1,bool color=BLACK);
+	void 			drawFastVLine(uint8_t x,uint8_t y,uint8_t h,bool color=BLACK);
+	void 			drawFastHLine(uint8_t x,uint8_t y,uint8_t w,bool color=BLACK);
+	void 			drawRect(uint8_t x,uint8_t y,uint8_t w,uint8_t h,bool color=BLACK);
+	void 			fillRect(uint8_t x,uint8_t y,uint8_t w,uint8_t h,bool color=BLACK);
 	
-	void 			drawCircle(uint8_t x0, uint8_t y0, uint16_t r,uint8_t color=BLACK);
+	void 			drawCircle(uint8_t x0, uint8_t y0, uint16_t r,bool color=BLACK);
 	
-	void 			fillCircle(uint8_t x0, uint8_t y0, uint16_t r,uint8_t color=BLACK);
-	void 			drawRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16_t r, uint8_t color=BLACK);
-	void 			fillRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16_t r, uint8_t color=BLACK);
+	void 			fillCircle(uint8_t x0, uint8_t y0, uint16_t r,bool color=BLACK);
+	void 			drawRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16_t r, bool color=BLACK);
+	void 			fillRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16_t r, bool color=BLACK);
 	//void 			setFont(const unsigned char * f);
 	virtual size_t  write(uint8_t);
 
@@ -95,7 +96,7 @@ protected:
 	uint8_t 		_cursor_y;
 	uint8_t 		_rotation;
 	uint8_t 		_textsize;
-	uint8_t			_txtColour;
+	bool			_txtColour;
 	boolean 		_wrap;
 	uint8_t 		_XRES;
 	uint8_t 		_YRES;
@@ -105,9 +106,9 @@ protected:
 	
 
 private:
-	void 			drawCircleHelper(uint8_t x0,uint8_t y0,uint8_t r,uint8_t cornername,uint8_t color);
-	void 			fillCircleHelper(uint8_t x0, uint8_t y0, uint16_t r, uint8_t cornername, int16_t delta, uint8_t color);
-	void 			drawChar(uint8_t x, uint8_t y, unsigned char c, uint8_t color, uint8_t size);
+	void 			drawCircleHelper(uint8_t x0,uint8_t y0,uint8_t r,uint8_t cornername,bool color);
+	void 			fillCircleHelper(uint8_t x0, uint8_t y0, uint16_t r, uint8_t cornername, int16_t delta, bool color);
+	void 			drawChar(uint8_t x, uint8_t y, unsigned char c, bool color, uint8_t size);
 	void 			inc_txtline();
 	void			clearBuffer();
 };

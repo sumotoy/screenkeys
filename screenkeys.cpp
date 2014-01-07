@@ -71,10 +71,9 @@ void screenkeys::setRotation(uint8_t val) {
   }
 }
 
-void screenkeys::drawPixel(uint8_t x, uint8_t y, uint8_t color) {
+void screenkeys::drawPixel(uint8_t x, uint8_t y, bool color) {
 	if ((x >= getWidth()) || (y >= getHeight())) return;
 	uint8_t xbyte;
-	// check rotation, move pixel around if necessary
 	switch (getRotation()) {
 	case 1:
 		swap(x, y);
@@ -92,72 +91,56 @@ void screenkeys::drawPixel(uint8_t x, uint8_t y, uint8_t color) {
   //pixel engine can be referenced from any angle of the LCD
 	if (_bufferAddressing == TL_ORIGIN){
   //0,0 on the Top Left
-	if (x < 8) {
-		xbyte = 0;
-	} else if (x < 16) {
-		xbyte = 1;
-	} else if (x < 24) {
-		xbyte = 2;
-	} else {
-		xbyte = 3;
-	}
-	if (color == 0) {
-		bitSet(_buffer[xbyte+(y*4)],x-(xbyte*8));
-	} else {
-		bitClear(_buffer[xbyte+(y*4)],x-(xbyte*8));
-	}
+		if (x < 8) {
+			xbyte = 0;
+		} else if (x < 16) {
+			xbyte = 1;
+		} else if (x < 24) {
+			xbyte = 2;
+		} else {
+			xbyte = 3;
+		}
+		bitWrite(_buffer[xbyte+(y*4)],x-(xbyte*8),!color);
 	} else if (_bufferAddressing == BR_ORIGIN){
   //0,0 on Bottom Right
-	if (x < 8) {
-		xbyte = 63;
-	} else if (x < 16) {
-		xbyte = 62;
-	} else if (x < 24) {
-		xbyte = 61;
-	} else {
-		xbyte = 60;
-	}
-	if (color == 0) {
-		bitSet(_buffer[xbyte-(y*4)],(7-x)-((xbyte-63)*8));
-	} else {
-		bitClear(_buffer[xbyte-(y*4)],(7-x)-((xbyte-63)*8));
-	}
+		if (x < 8) {
+			xbyte = 63;
+		} else if (x < 16) {
+			xbyte = 62;
+		} else if (x < 24) {
+			xbyte = 61;
+		} else {
+			xbyte = 60;
+		}
+		bitWrite(_buffer[xbyte-(y*4)],(7-x)-((xbyte-63)*8),!color);
 	} else if (_bufferAddressing == BL_ORIGIN){
   //0,0 on Bottom Left
-	if (x < 8) {
-		xbyte = 60;
-	} else if (x < 16) {
-		xbyte = 61;
-	} else if (x < 24) {
-		xbyte = 62;
-	} else {
-		xbyte = 63;
-	}
-	if (color == 0) {
-		bitSet(_buffer[xbyte-(y*4)],x-((xbyte-60)*8));
-	} else {
-		bitClear(_buffer[xbyte-(y*4)],x-((xbyte-60)*8));
-	}
+		if (x < 8) {
+			xbyte = 60;
+		} else if (x < 16) {
+			xbyte = 61;
+		} else if (x < 24) {
+			xbyte = 62;
+		} else {
+			xbyte = 63;
+		}
+		bitWrite(_buffer[xbyte-(y*4)],x-((xbyte-60)*8),!color);
 	} else {//TR_ORIGIN
   //0,0 on Top Right
-	if (x < 8) {
-		xbyte = 3;
-	} else if (x < 16) {
-		xbyte = 2;
-	} else if (x < 24) {
-		xbyte = 1;
-	} else {
-		xbyte = 0;
-	}
-	if (color == 0) {
-		bitSet(_buffer[xbyte+(y*4)],(7-x)-((xbyte-3)*8));
-	} else {
-		bitClear(_buffer[xbyte+(y*4)],(7-x)-((xbyte-3)*8));
-	}
+		if (x < 8) {
+			xbyte = 3;
+		} else if (x < 16) {
+			xbyte = 2;
+		} else if (x < 24) {
+			xbyte = 1;
+		} else {
+			xbyte = 0;
+		}
+		bitWrite(_buffer[xbyte+(y*4)],(7-x)-((xbyte-3)*8),!color);
 	}
 }
 
-void screenkeys::drawLine(uint8_t x0,uint8_t y0,uint8_t x1,uint8_t y1,uint8_t color) {
+void screenkeys::drawLine(uint8_t x0,uint8_t y0,uint8_t x1,uint8_t y1,bool color) {
 	if ((x0 >= getWidth()) || (y0 >= getHeight()) || (x1 >= getWidth()) || (y1 >= getHeight())) return;
 	uint8_t steep = abs(y1 - y0) > abs(x1 - x0);
 	if (steep) {
@@ -192,29 +175,29 @@ void screenkeys::drawLine(uint8_t x0,uint8_t y0,uint8_t x1,uint8_t y1,uint8_t co
 	}
 }
 
-void screenkeys::drawFastVLine(uint8_t x,uint8_t y,uint8_t h,uint8_t color) {
+void screenkeys::drawFastVLine(uint8_t x,uint8_t y,uint8_t h,bool color) {
 	drawLine(x,y,x,y+h-1,color);
 }
 
-void screenkeys::drawFastHLine(uint8_t x,uint8_t y,uint8_t w,uint8_t color) {
+void screenkeys::drawFastHLine(uint8_t x,uint8_t y,uint8_t w,bool color) {
 	drawLine(x,y,x+w-1,y,color);
 }
 
-void screenkeys::drawRect(uint8_t x,uint8_t y,uint8_t w,uint8_t h,uint8_t color) {
+void screenkeys::drawRect(uint8_t x,uint8_t y,uint8_t w,uint8_t h,bool color) {
 	drawFastHLine(x, y, w, color);
 	drawFastHLine(x, y+h-1, w, color);
 	drawFastVLine(x, y, h, color);
 	drawFastVLine(x+w-1, y, h, color);
 }
 
-void screenkeys::fillRect(uint8_t x,uint8_t y,uint8_t w,uint8_t h,uint8_t color) {
+void screenkeys::fillRect(uint8_t x,uint8_t y,uint8_t w,uint8_t h,bool color) {
 	uint8_t i;
 	for (i=x; i<x+w; i++) {
 		drawFastVLine(i, y, h, color);
 	}
 }
 
-void screenkeys::drawCircleHelper(uint8_t x0,uint8_t y0,uint8_t r,uint8_t cornername,uint8_t color) {
+void screenkeys::drawCircleHelper(uint8_t x0,uint8_t y0,uint8_t r,uint8_t cornername,bool color) {
 	int16_t f     = 1 - r;
 	int16_t ddF_x = 1;
 	int16_t ddF_y = -2 * r;
@@ -248,7 +231,7 @@ void screenkeys::drawCircleHelper(uint8_t x0,uint8_t y0,uint8_t r,uint8_t corner
 	}
 }
 
-void screenkeys::drawCircle(uint8_t x0, uint8_t y0, uint16_t r,uint8_t color) {
+void screenkeys::drawCircle(uint8_t x0, uint8_t y0, uint16_t r,bool color) {
 	int16_t f = 1 - r;
 	int16_t ddF_x = 1;
 	int16_t ddF_y = -2 * r;
@@ -259,7 +242,6 @@ void screenkeys::drawCircle(uint8_t x0, uint8_t y0, uint16_t r,uint8_t color) {
 	drawPixel(x0  , y0-r, color);
 	drawPixel(x0+r, y0  , color);
 	drawPixel(x0-r, y0  , color);
-
 	while (x<y) {
 		if (f >= 0) {
 			y--;
@@ -269,7 +251,6 @@ void screenkeys::drawCircle(uint8_t x0, uint8_t y0, uint16_t r,uint8_t color) {
 		x++;
 		ddF_x += 2;
 		f += ddF_x;
-
 		drawPixel(x0 + x, y0 + y, color);
 		drawPixel(x0 - x, y0 + y, color);
 		drawPixel(x0 + x, y0 - y, color);
@@ -281,7 +262,7 @@ void screenkeys::drawCircle(uint8_t x0, uint8_t y0, uint16_t r,uint8_t color) {
 	}
 }
 
-void screenkeys::fillCircleHelper(uint8_t x0, uint8_t y0, uint16_t r, uint8_t cornername, int16_t delta, uint8_t color) {
+void screenkeys::fillCircleHelper(uint8_t x0, uint8_t y0, uint16_t r, uint8_t cornername, int16_t delta, bool color) {
 	int16_t f     = 1 - r;
 	int16_t ddF_x = 1;
 	int16_t ddF_y = -2 * r;
@@ -297,7 +278,6 @@ void screenkeys::fillCircleHelper(uint8_t x0, uint8_t y0, uint16_t r, uint8_t co
 		x++;
 		ddF_x += 2;
 		f     += ddF_x;
-
 		if (cornername & 0x1) {
 			drawFastVLine(x0+x, y0-y, 2*y+1+delta, color);
 			drawFastVLine(x0+y, y0-x, 2*x+1+delta, color);
@@ -309,13 +289,13 @@ void screenkeys::fillCircleHelper(uint8_t x0, uint8_t y0, uint16_t r, uint8_t co
 	}
 }
 
-void screenkeys::fillCircle(uint8_t x0, uint8_t y0, uint16_t r,uint8_t color) {
+void screenkeys::fillCircle(uint8_t x0, uint8_t y0, uint16_t r,bool color) {
 	drawFastVLine(x0, y0-r, 2*r+1, color);
 	fillCircleHelper(x0, y0, r, 3, 0, color);
 }
 
 
-void screenkeys::drawRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16_t r, uint8_t color) {
+void screenkeys::drawRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16_t r, bool color) {
   // smarter version
 	drawFastHLine(x+r  , y    , w-2*r, color); // Top
 	drawFastHLine(x+r  , y+h-1, w-2*r, color); // Bottom
@@ -329,7 +309,7 @@ void screenkeys::drawRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16
 }
 
 
-void screenkeys::fillRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16_t r, uint8_t color) {
+void screenkeys::fillRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16_t r, bool color) {
   // smarter version
 	fillRect(x+r, y, w-2*r, h, color);
   // draw four corners
@@ -345,7 +325,7 @@ void screenkeys::setCursor(uint8_t x, uint8_t y) {
 }
 
 
-void screenkeys::drawChar(uint8_t x, uint8_t y, unsigned char c, uint8_t color, uint8_t size) {
+void screenkeys::drawChar(uint8_t x, uint8_t y, unsigned char c, bool color, uint8_t size) {
 	// Clip right // Clip bottom  // Clip left  // Clip top
   if ((x >= _width) || (y >= _height) || ((x + 6 * size - 1) < 0) || ((y + 8 * size - 1) < 0)) return;
   _bufferAddressing = TL_ORIGIN;//adafruit glcd fonts use this method or will be reversed
