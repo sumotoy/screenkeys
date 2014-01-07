@@ -47,6 +47,8 @@ Version history:
 
 #define swap(a, b) { int8_t t = a; a = b; b = t; }
 
+//#define _DBG
+
 //Pixel engine write directly in a buffer, here you can choose
 //the preferred method. Some font it's reversed or specular so the engine can
 //switch method on the fly and come back to the default method.
@@ -86,8 +88,11 @@ public:
 	void 			fillCircle(uint8_t x0, uint8_t y0, uint16_t r,bool color=BLACK);
 	void 			drawRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16_t r, bool color=BLACK);
 	void 			fillRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16_t r, bool color=BLACK);
-	//void 			setFont(const unsigned char * f);
+	void 			setFont(const unsigned char * fnt);
 	virtual size_t  write(uint8_t);
+	#if defined(_DBG)
+	uint8_t			myDbg();
+	#endif
 
 protected:
 	uint8_t 		_width;
@@ -103,14 +108,18 @@ protected:
 	uint8_t 		_buffer[64];
 	uint8_t			_bufferAddressing;
 	const unsigned char * _font;
-	
-
+	#if defined(_DBG)
+	uint8_t			_dbg;
+	#endif
 private:
 	void 			drawCircleHelper(uint8_t x0,uint8_t y0,uint8_t r,uint8_t cornername,bool color);
 	void 			fillCircleHelper(uint8_t x0, uint8_t y0, uint16_t r, uint8_t cornername, int16_t delta, bool color);
-	void 			drawChar(uint8_t x, uint8_t y, unsigned char c, bool color, uint8_t size);
+	void 			drawChar(uint8_t x, uint8_t y, unsigned char c, uint8_t fontW, uint8_t fontH, bool color, uint8_t size);
 	void 			inc_txtline();
 	void			clearBuffer();
+	#if defined(_DBG)
+	void 			setDbg(uint8_t data);
+	#endif
 };
 
 #endif

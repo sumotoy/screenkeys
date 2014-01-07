@@ -21,13 +21,17 @@ screenkeys::screenkeys()
 	_wrap = true;
 	clearBuffer();
 	_bufferAddressing = DEFAULT_BUFFER_ADDRESSING;
+	
+	setFont(font5x7);
+	#if defined(_DBG)
+	_dbg = 1;
+	#endif
 }
 
 void screenkeys::clearBuffer() {
 	for (uint8_t i=0;i<64;i++){
 		_buffer[i] = 0x00;
 	}	
-
 }
 
 uint8_t screenkeys::getWidth(void) {
@@ -324,19 +328,34 @@ void screenkeys::setCursor(uint8_t x, uint8_t y) {
 	_cursor_y = y;
 }
 
+void screenkeys::setFont(const unsigned char * fnt) {
+	_font = fnt;
+}
 
-void screenkeys::drawChar(uint8_t x, uint8_t y, unsigned char c, bool color, uint8_t size) {
-	// Clip right // Clip bottom  // Clip left  // Clip top
-  if ((x >= _width) || (y >= _height) || ((x + 6 * size - 1) < 0) || ((y + 8 * size - 1) < 0)) return;
-  _bufferAddressing = TL_ORIGIN;//adafruit glcd fonts use this method or will be reversed
-  for (uint8_t i = 0;i < 6;i++) {
+#if defined(_DBG)
+void screenkeys::setDbg(uint8_t data){
+	_dbg = data;
+}
+
+uint8_t screenkeys::myDbg(){
+	//setDbg(pgm_read_byte(font+1));
+	return _dbg;
+}
+#endif
+
+void screenkeys::drawChar(uint8_t x, uint8_t y, unsigned char c, uint8_t fontW, uint8_t fontH, bool color, uint8_t size) {
+  // Clip right // Clip bottom  // Clip left  // Clip top
+  if ((x >= _width) || (y >= _height) || (((x + (fontW+1)) * (size - 1)) < 0) || (((y + (fontH+1)) * (size - 1)) < 0)) return;
+  uint8_t i,j;
+  _bufferAddressing = pgm_read_byte(_font+2);;//How to write this font? This will instruct the pixel engine.
+  for (i = 0;i <= fontW;i++) {
 		uint8_t line;
-		if (i == 5) {
+		if (i == fontW) {
 			line = 0x0;
 		} else {
-			line = pgm_read_byte(font+(c*5)+i);
+			line = pgm_read_byte((_font+(c*fontW)+i)+3);
 		}
-		for (uint8_t j = 0; j<8; j++) {
+		for (j = 0; j < 8; j++) {
 			if (line & 0x1) {
 				if (size == 1) {
 					drawPixel(x+i, y+j, color);
@@ -351,16 +370,20 @@ void screenkeys::drawChar(uint8_t x, uint8_t y, unsigned char c, bool color, uin
 }
 
 size_t screenkeys::write(uint8_t c) {
+	uint8_t fontW = pgm_read_byte(_font);//5
+	uint8_t fontH = pgm_read_byte(_font+1);//7
 	if (c == '\n') {
-		_cursor_y += _textsize * 8;
+		_cursor_y += _textsize * (fontH + 1);
 		_cursor_x  = 0;
 	} else if (c == '\r') {
     // skip em
 	} else {
-		drawChar(_cursor_x, _cursor_y, c, _txtColour, _textsize);
-		_cursor_x += _textsize * 6;
-		if (_wrap && (_cursor_x > (_width - (_textsize * 6)))) {
-			_cursor_y += _textsize * 8;
+		if (_cursor_x < fontW) _cursor_x = fontW + _cursor_x;
+		if (_cursor_y < fontH) _cursor_y = fontH + _cursor_y;
+		drawChar(_cursor_x, _cursor_y, c, fontW,fontH,_txtColour, _textsize);
+		_cursor_x += _textsize * (fontW + 1);
+		if (_wrap && (_cursor_x > (_width - (_textsize * (fontW + 1))))) {
+			_cursor_y += _textsize * (fontH + 1);
 			_cursor_x = 0;
 		}
 	}

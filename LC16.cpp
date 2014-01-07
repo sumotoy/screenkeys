@@ -157,6 +157,7 @@ void LC16::init_lcdChip(uint8_t key){
   clear(key);
   refresh(key);
   setColor(key,BL_NONE);
+  
   delay(100);
 }
 
