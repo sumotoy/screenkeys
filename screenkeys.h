@@ -57,6 +57,7 @@ Version history:
 #define BR_ORIGIN		1
 #define BL_ORIGIN 		2//normal operations
 #define TR_ORIGIN		3
+
 //here you can choose the preferred origin buffer write method
 #define DEFAULT_BUFFER_ADDRESSING	BL_ORIGIN
 
@@ -115,7 +116,6 @@ private:
 	void 			drawCircleHelper(uint8_t x0,uint8_t y0,uint8_t r,uint8_t cornername,bool color);
 	void 			fillCircleHelper(uint8_t x0, uint8_t y0, uint16_t r, uint8_t cornername, int16_t delta, bool color);
 	void 			drawChar(uint8_t x, uint8_t y, unsigned char c, uint8_t fontW, uint8_t fontH, bool color, uint8_t size);
-	void 			inc_txtline();
 	void			clearBuffer();
 	#if defined(_DBG)
 	void 			setDbg(uint8_t data);
