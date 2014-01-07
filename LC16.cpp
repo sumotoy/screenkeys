@@ -100,23 +100,14 @@ void LC16::sendData(uint8_t key,unsigned char cDataByte, unsigned char cParity){
 	for(i = 0; i < 8; i++) {
 		//Get lsb of data
 		cBit = (cDataByte & 0x01);
-		//Send bit to key
-		if (cBit == 1){
-			bitSet(temp,key);
-		} else {
-			bitClear(temp,key);
-		}
+		bitWrite(temp,key,cBit);
 		mcp.gpioPort(temp);//send to gpio
 		PClock(1) ; 
 		//Shift data right to ready next bit
 		cDataByte = cDataByte >> 1 ;
 	}
 	//Send computed parity bit
-	if (cParity){
-		bitSet(temp,key);
-	} else {
-		bitClear(temp,key);
-	}
+	bitWrite(temp,key,cParity);
 	mcp.gpioPort(temp);//send to gpio
 	PClock(1) ;
 	bitSet(temp,key);
