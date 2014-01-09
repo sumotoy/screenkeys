@@ -53,5 +53,11 @@ With 48 switches (this means 48 tiny LCD screens!!!) Teensy3 resources are used 
 - Library works 'out of the box'? Just connect the switch? NO! Needs specific hardware (still not published).
 - How many switches support? 64 Max.
 - Can work with other Microcontrollers? Probably yes but was intended only for Teensy3.
+- 
+
+<b>Development Status:</b><br>
+
+- 0.3b1: First beta stage. Graphic support completed. Text support compleded. Screenkey routines completed.
+         Time to work on multiple (64) device addressing and Switch scanning.
 
 For commercial purposes and licence questions please contact me.
