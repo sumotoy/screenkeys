@@ -49,15 +49,26 @@ With 48 switches (this means 48 tiny LCD screens!!!) Teensy3 resources are used 
 - Identify multiple buttons pressed.
 
 <b>FAQ:</b><br>
+<dl>
+  <dt>Library works 'out of the box'? Just connect the switch?</dt>
+  <dd><b>NO!</b> Needs specific hardware (still not published).</dd>
+  <dt>How many switches support?</dt>
+  <dd>Actually 64 but can be exanded even more.</dd>
+  <dt>Can work with other Microcontrollers?</dt>
+  <dd>can be... But Teensy £.x it's perfect for this project and arduinos are not in my todo list.</dd>
+</dl>
 
-- Library works 'out of the box'? Just connect the switch? NO! Needs specific hardware (still not published).
-- How many switches support? 64 Max.
-- Can work with other Microcontrollers? Probably yes but was intended only for Teensy3.
-- 
 
 <b>Development Status:</b><br>
 
-- 0.3b1: First beta stage. Graphic support completed. Text support compleded. Screenkey routines completed.
-         Time to work on multiple (64) device addressing and Switch scanning.
+<b>0.3b1:</b>
+
+ - [x] Screenkey low level routines.
+ - [x] Graphic routines.
+ - [x] Text routines.
+ - [ ] 64 Screenkeys addressing. (actually 8 supported for test)
+ - [ ] Switch Scan routines.
+
+
 
 For commercial purposes and licence questions please contact me.
