@@ -40,7 +40,6 @@ LC16::LC16(const uint8_t switches,const uint8_t csPin,const uint8_t startAdrs,co
 void LC16::begin(bool protocolInitOverride) {
 	//screenkeys::begin(protocolInitOverride);
 	if (_error == 0){
-		pinMode(_mainClock,OUTPUT);
 		pinMode(_programClock,OUTPUT);
 		pinMode(_clockEnable,OUTPUT);
 		digitalWrite(_programClock,HIGH);
@@ -50,8 +49,11 @@ void LC16::begin(bool protocolInitOverride) {
 		delay(100);
 		mcp.gpioPinMode(OUTPUT);
 		mcp.gpioPort(0xFFFF);
+		#ifndef __USEEXTCLK
+		pinMode(_mainClock,OUTPUT);
 		analogWriteFrequency(_mainClock, CLK_FRQ);
 		analogWrite(_mainClock,120);
+		#endif
 		init_lcdChip(0);
 	}
 }
@@ -71,15 +73,17 @@ void LC16::PClock(uint8_t cTicks){
 } 
 
 void LC16::progEnable(boolean mode){
+	digitalWriteFast(_clockEnable,!mode);
+	/*
   if (mode){
     digitalWriteFast(_clockEnable,LOW);
-    digitalWriteFast(_programClock,HIGH);
   } 
   else {
     digitalWriteFast(_clockEnable,HIGH);
-    analogWrite(_mainClock,120);
   }
+  */
 }
+
 
 void LC16::sendData(uint8_t key,unsigned char cDataByte, unsigned char cParity){
 	progEnable(true);//disconnect main clock
@@ -115,7 +119,6 @@ void LC16::sendData(uint8_t key,unsigned char cDataByte, unsigned char cParity){
 	PClock(1) ;
 	mcp.gpioPort(temp);//send to gpio
 	PClock(1) ;
-	//digitalWriteFast(PRG_CLOCK_PIN,HIGH);
 	progEnable(false);//reconnect main clock
 } 
 

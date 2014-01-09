@@ -5,9 +5,7 @@
 #include <Arduino.h>
 #include "screenkeys.h"
 
-#include "glcdfont.c"
-
-#define pgm_read_byte(addr) (*(const unsigned char *)(addr))
+//#define pgm_read_byte(addr) (*(const unsigned char *)(addr))
 
 screenkeys::screenkeys() 
 {
@@ -17,12 +15,11 @@ screenkeys::screenkeys()
 	_cursor_y = 0;
 	_rotation = 0;
 	_textsize = 1;
-	_txtColour = 0;//black
+	_foreground = BLACK;
+	_background = WHITE;
 	_wrap = true;
 	clearBuffer();
-	_bufferAddressing = DEFAULT_BUFFER_ADDRESSING;
-	
-	setFont(font5x7);
+	//_bufferAddressing = DEFAULT_BUFFER_ADDRESSING;
 	#if defined(_DBG)
 	_dbg = 1;
 	#endif
@@ -33,6 +30,13 @@ void screenkeys::clearBuffer() {
 		_buffer[i] = 0x00;
 	}	
 }
+
+void screenkeys::invertBuffer() {
+	for (uint8_t i=0;i<64;i++){
+		_buffer[i] ^= 0xFF;
+	}	
+}
+
 
 uint8_t screenkeys::getWidth(void) {
   return _width;
@@ -56,7 +60,7 @@ void screenkeys::setTextSize(uint8_t s) {
 
 void screenkeys::setTextColor(uint8_t c) {
 	if (c > 1) c = 1;
-	_txtColour = c;
+	_foreground = c;
 }
 
 void screenkeys::setRotation(uint8_t val) {
@@ -93,7 +97,8 @@ void screenkeys::drawPixel(uint8_t x, uint8_t y, bool color) {
 		break;
   }  
   //pixel engine can be referenced from any angle of the LCD
-	if (_bufferAddressing == TL_ORIGIN){
+	//if (_bufferAddressing == TL_ORIGIN){
+	#if defined(TL_ORIGIN)
   //0,0 on the Top Left
 		if (x < 8) {
 			xbyte = 0;
@@ -105,7 +110,8 @@ void screenkeys::drawPixel(uint8_t x, uint8_t y, bool color) {
 			xbyte = 3;
 		}
 		bitWrite(_buffer[xbyte+(y*4)],x-(xbyte*8),!color);
-	} else if (_bufferAddressing == BR_ORIGIN){
+	#elif defined(BR_ORIGIN)
+	//} else if (_bufferAddressing == BR_ORIGIN){
   //0,0 on Bottom Right
 		if (x < 8) {
 			xbyte = 63;
@@ -117,7 +123,8 @@ void screenkeys::drawPixel(uint8_t x, uint8_t y, bool color) {
 			xbyte = 60;
 		}
 		bitWrite(_buffer[xbyte-(y*4)],(7-x)-((xbyte-63)*8),!color);
-	} else if (_bufferAddressing == BL_ORIGIN){
+	#elif defined(BL_ORIGIN)	
+	//} else if (_bufferAddressing == BL_ORIGIN){
   //0,0 on Bottom Left
 		if (x < 8) {
 			xbyte = 60;
@@ -129,7 +136,8 @@ void screenkeys::drawPixel(uint8_t x, uint8_t y, bool color) {
 			xbyte = 63;
 		}
 		bitWrite(_buffer[xbyte-(y*4)],x-((xbyte-60)*8),!color);
-	} else {//TR_ORIGIN
+	#else
+	//} else {//TR_ORIGIN
   //0,0 on Top Right
 		if (x < 8) {
 			xbyte = 3;
@@ -141,7 +149,8 @@ void screenkeys::drawPixel(uint8_t x, uint8_t y, bool color) {
 			xbyte = 0;
 		}
 		bitWrite(_buffer[xbyte+(y*4)],(7-x)-((xbyte-3)*8),!color);
-	}
+	#endif	
+	//}
 }
 
 void screenkeys::drawLine(uint8_t x0,uint8_t y0,uint8_t x1,uint8_t y1,bool color) {
@@ -343,49 +352,111 @@ uint8_t screenkeys::myDbg(){
 }
 #endif
 
-void screenkeys::drawChar(uint8_t x, uint8_t y, unsigned char c, uint8_t fontW, uint8_t fontH, bool color, uint8_t size) {
-  // Clip right // Clip bottom  // Clip left  // Clip top
-  if ((x >= _width) || (y >= _height) || (((x + (fontW+1)) * (size - 1)) < 0) || (((y + (fontH+1)) * (size - 1)) < 0)) return;
-  uint8_t i,j;
-  _bufferAddressing = pgm_read_byte(_font+2);;//How to write this font? This will instruct the pixel engine.
-  for (i = 0;i <= fontW;i++) {
-		uint8_t line;
-		if (i == fontW) {
-			line = 0x0;
-		} else {
-			line = pgm_read_byte((_font+(c*fontW)+i)+3);
-		}
-		for (j = 0; j < 8; j++) {
-			if (line & 0x1) {
-				if (size == 1) {
-					drawPixel(x+i, y+j, color);
-				} else {  // big size
-					fillRect(x+(i*size), y+(j*size), size, size, color);
-				} 
-			}
-			line >>= 1;
-		}
-	}
-	_bufferAddressing = DEFAULT_BUFFER_ADDRESSING;//go back to choosed addressing
-}
 
-size_t screenkeys::write(uint8_t c) {
-	uint8_t fontW = pgm_read_byte(_font);//5
-	uint8_t fontH = pgm_read_byte(_font+1);//7
-	if (c == '\n') {
-		_cursor_y += _textsize * (fontH + 1);
-		_cursor_x  = 0;
-	} else if (c == '\r') {
-    // skip em
-	} else {
-		if (_cursor_x < fontW) _cursor_x = fontW + _cursor_x;
-		if (_cursor_y < fontH) _cursor_y = fontH + _cursor_y;
-		drawChar(_cursor_x, _cursor_y, c, fontW,fontH,_txtColour, _textsize);
-		_cursor_x += _textsize * (fontW + 1);
-		if (_wrap && (_cursor_x > (_width - (_textsize * (fontW + 1))))) {
-			_cursor_y += _textsize * (fontH + 1);
-			_cursor_x = 0;
+size_t screenkeys::write(uint8_t c){
+	if (_cursor_x > _width || _cursor_y > _height) return 1;
+	struct FontHeader header;
+	memcpy_P(&header, _font, sizeof(FontHeader));
+	//se il carattere è troppo alto esci.
+	if (_cursor_y+header.height < 0) return 1;
+	if (_cursor_x > 0) drawLine(_cursor_x - 1,_cursor_y,_cursor_x - 1,(_cursor_y + header.height) - 1, _background);
+		if(c == '\n') { // Newline
+			_cursor_y = _cursor_y - header.height - 1;
+		} else if (c == '\r') {	
+		} else {
+			//scrive il carattere e riceve il suo ingombro!
+			int charWide = drawChar2(_cursor_x, _cursor_y, c, _foreground, _background);
+			if (charWide > 0) {//carattere scritto,cancelliamo un pezzo di quello che segue per evitare sporcature
+				#if defined(_PRECLN)
+				drawFastVLine(_cursor_x + charWide, _cursor_y, _cursor_y + header.height-1, _background);
+				#endif
+			}
 		}
-	}
 	return 1;
 }
+
+uint8_t screenkeys::drawChar2(uint8_t x,uint8_t y, unsigned char c,bool colour,bool _background){
+	if (x >= _width || y >= _height) {
+		return 0;
+	}
+	struct FontHeader header;
+	memcpy_P(&header, (void*)_font, sizeof(FontHeader));
+	if (c == ' ') {//scrive uno spazio
+		uint8_t charWide = charWidth(' ');
+		fillRect(x,y-1,x + charWide,y + header.height,_background);
+		return charWide;
+	}
+	//se il carattere è fuori range non continuare!
+	if (c < header.firstChar || c >= (header.firstChar + header.charCount)) {
+		return 0;
+	}
+	uint8_t width = 0;
+	uint16_t index = 0;
+	//calcola di quanti bytes è una colonna
+	uint8_t bytes = (header.height + 7) / 8;
+	//calcola il carattere (non c'è tutta la scala)
+	c -= header.firstChar;
+	// ora si valuta se è un Fixed Width o Variabile
+	if (header.size == 0) {//fixed width
+		width = header.fixedWidth;//il width è fisso
+		//questo calcola quanto è grande l'indice intero di tutti i bits del font
+		index = sizeof(FontHeader) + (c*(bytes * width));
+	} else {
+		// variable width font, read width data, to get the index
+		for (uint8_t i = 0; i < c; i++) {
+			index += pgm_read_byte(this->_font + sizeof(FontHeader) + i);
+		}
+		index = index * bytes + sizeof(FontHeader) + header.charCount;
+		width = pgm_read_byte(this->_font + sizeof(FontHeader) + c);
+	}
+	//ora si valuta se il carattere è dentro lo schermo, altrimenti si esce
+	if (x < -width || y < -header.height) return 0;
+	//per evitare sporcature, scrivo una riga con lo stesso colore del background
+	#if defined(_PRECLN)
+	drawFastVLine(x>0?x:0,y>0?y:0,(y+header.height)>(_height-1)?(_height-1):(y+header.height)-1,_background);
+	#endif
+	for (int16_t ox = 0; ox < width; ox++) {
+		if (ox+x >= _width) break;
+		int16_t oy = 0;
+		for (int8_t byte_y = bytes-1; byte_y >= 0; byte_y--) {
+			uint8_t data = pgm_read_byte(this->_font + index + ox + (byte_y * width));
+			int8_t start_bit;
+			int8_t end_bit;
+			if (bytes == 1) {
+				start_bit = header.height-1;
+				end_bit = 0;
+			} else {
+				start_bit = 7;
+				end_bit = (byte_y < (bytes-1)) ? 0: 7-((header.height-1)%8);
+			}
+			for(int8_t bit_y = start_bit; bit_y >= end_bit; bit_y--) {
+				if ((oy + y) < _height && (ox + x) >= 0 && (oy + y) >= 0) {
+					 //drawPixel(x+ox,y+(((header.height-1)-bit_y)-(byte_y*(1+start_bit-end_bit))), (data & 1<<bit_y) ? colour : _background);
+					 drawPixel(x+ox,y+(((header.height-1)-bit_y)-(byte_y*(1+start_bit-end_bit))),(data & (1 << bit_y)) ? colour : _background);
+				}
+				oy++;
+				if (oy == header.height) break;
+			}
+		}
+		_cursor_x++;//avanzamento cursore
+	}
+	_cursor_x++;//avanzamento cursore
+	return width;
+}
+
+
+uint8_t screenkeys::charWidth(unsigned char c) {
+	if (c == ' ') c = 'n';
+	uint8_t width = 0;
+	struct FontHeader header;
+	memcpy_P(&header,(void*)_font, sizeof(FontHeader));
+	if (c < header.firstChar || c >= (header.firstChar + header.charCount))  return 0;
+	c -= header.firstChar;
+	if (header.size == 0) {
+		return header.fixedWidth;
+	} else {
+		width = pgm_read_byte(_font + sizeof(FontHeader) + c);
+	}
+	return width;
+}
+

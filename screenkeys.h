@@ -8,7 +8,7 @@
 	screenkeys - A Library and Hardware (For Teensy3.x) to drive 1..64 LCD ScreenKeys buttons with 6..7 wires
 ---------------------------------------------------------------------------------------------------------------------
 Version history:
-0.3a3: alpha version, still in deep changes
+0.3b1
 ---------------------------------------------------------------------------------------------------------------------
 		Copyright (c) 2014, s.u.m.o.t.o.y [sumotoy(at)gmail.com]
 ---------------------------------------------------------------------------------------------------------------------
@@ -29,7 +29,7 @@ Version history:
 	Small code portions from Adafruit (Adafruit_GFX).
 	https://github.com/adafruit/Adafruit-GFX-Library
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	Version:0.3a3
+	Version:0.3b1
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	Attention! This library needs gpio_expander library
 	https://github.com/sumotoy/gpio_expander
@@ -47,19 +47,33 @@ Version history:
 
 #define swap(a, b) { int8_t t = a; a = b; b = t; }
 
-//#define _DBG
-
+#if defined(__AVR__) || (defined(ARDUINO) && ARDUINO > 152) || defined(CORE_TEENSY)
+	#include <avr/pgmspace.h>
+#else // ARM
+// Stub out some other common PROGMEM functions
+	#define PROGMEM
+	#define memcpy_P memcpy
+	static inline uint8_t pgm_read_byte(const void *addr) { return *((uint8_t *)addr); }
+#endif
+//------------------ External Clock Enable -----------------
+//if you are using an external clock and you don't want generate internally, uncomment it
+//#define	__USEEXTCLK
+//------------------ Debug Routines ------------------------
+//this is used only for debug purposes
+//#define 	_DBG
+//----------------- Text Options ---------------------------
+//there's a small routine that clear before write any char, useful for mainly large screens
+//#define _PRECLN
+// ---------------- Pixel Engine ---------------------------
 //Pixel engine write directly in a buffer, here you can choose
 //the preferred method. Some font it's reversed or specular so the engine can
 //switch method on the fly and come back to the default method.
 //Do not touch these numbers
-#define TL_ORIGIN		0
-#define BR_ORIGIN		1
-#define BL_ORIGIN 		2//normal operations
-#define TR_ORIGIN		3
-
-//here you can choose the preferred origin buffer write method
-#define DEFAULT_BUFFER_ADDRESSING	BL_ORIGIN
+//#define TL_ORIGIN//		0
+//#define BR_ORIGIN//		1
+#define BL_ORIGIN// 		2//normal operations
+//#define TR_ORIGIN//		3
+//-----------------------------------------------------------
 
 #define BLACK 0
 #define WHITE 1
@@ -85,7 +99,7 @@ public:
 	void 			fillRect(uint8_t x,uint8_t y,uint8_t w,uint8_t h,bool color=BLACK);
 	
 	void 			drawCircle(uint8_t x0, uint8_t y0, uint16_t r,bool color=BLACK);
-	
+
 	void 			fillCircle(uint8_t x0, uint8_t y0, uint16_t r,bool color=BLACK);
 	void 			drawRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16_t r, bool color=BLACK);
 	void 			fillRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16_t r, bool color=BLACK);
@@ -94,32 +108,43 @@ public:
 	#if defined(_DBG)
 	uint8_t			myDbg();
 	#endif
-
+	void 			invertBuffer();
 protected:
-	uint8_t 		_width;
-	uint8_t 		_height;
-	uint8_t 		_cursor_x;
-	uint8_t 		_cursor_y;
-	uint8_t 		_rotation;
-	uint8_t 		_textsize;
-	bool			_txtColour;
-	boolean 		_wrap;
-	uint8_t 		_XRES;
-	uint8_t 		_YRES;
-	uint8_t 		_buffer[64];
-	uint8_t			_bufferAddressing;
-	const unsigned char * _font;
+	uint8_t 				_width;
+	uint8_t 				_height;
+	uint8_t 				_cursor_x;
+	uint8_t 				_cursor_y;
+	uint8_t 				_rotation;
+	uint8_t 				_textsize;
+	bool					_foreground;
+	bool					_background;
+	boolean 				_wrap;
+	uint8_t 				_XRES;
+	uint8_t 				_YRES;
+	uint8_t 				_buffer[64];
+	uint8_t					_bufferAddressing;
+	const unsigned char * 	_font;
 	#if defined(_DBG)
-	uint8_t			_dbg;
+	uint8_t					_dbg;
 	#endif
 private:
 	void 			drawCircleHelper(uint8_t x0,uint8_t y0,uint8_t r,uint8_t cornername,bool color);
 	void 			fillCircleHelper(uint8_t x0, uint8_t y0, uint16_t r, uint8_t cornername, int16_t delta, bool color);
-	void 			drawChar(uint8_t x, uint8_t y, unsigned char c, uint8_t fontW, uint8_t fontH, bool color, uint8_t size);
+	uint8_t 		drawChar2(uint8_t x,uint8_t y, unsigned char c,bool colour, bool background=WHITE);
+	uint8_t 		charWidth(unsigned char c);
 	void			clearBuffer();
+	
 	#if defined(_DBG)
 	void 			setDbg(uint8_t data);
 	#endif
+	struct FontHeader {
+		uint16_t size;			//0
+		uint8_t fixedWidth;		//1
+		uint8_t height;			//2
+		uint8_t firstChar;		//3
+		uint8_t charCount;		//4
+	};
+	//
 };
 
 #endif

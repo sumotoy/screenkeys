@@ -1,7 +1,16 @@
 #include <SPI.h>        // needed!
 #include <mcp23s17.h>   // needed!
 #include <LC16.h>       // needed!
-
+#include <fonts/SystemFont5x7.h>//ok
+//#include <fonts/squarer10x11.h>//ok
+//#include <fonts/beatbox10x11.h>//ok
+//#include <fonts/binBold10x8.h>//ok
+//#include <fonts/binReg10x9.h>//ok
+//#include <fonts/binSmall10x8.h>//ok
+//#include <fonts/block10x10.h>//ok
+//#include <fonts/block10x9.h>//ok
+//#include <fonts/block10x7.h>//ok
+#include <fonts/block10x7.h>//ok
 
 // definitions -------------------
 #define   SWITCHES            16
@@ -28,9 +37,6 @@ unsigned char exit_img[64] = {
   0x04, 0x00, 0x00, 0x60,
   0x04, 0x00, 0x00, 0x40 }; 
   
-  //font8x8
-//font6x8
-//font4x6
 /*
 No of switches / CS pin / start address / prg clock pin / en clock pin
 Master clock pin it's defined in the library
@@ -38,22 +44,29 @@ Master clock pin it's defined in the library
 LC16 lcdKeys(SWITCHES,CS_COMMON_PIN,START_ADRS,PRG_CLOCK_PIN,ENABLE_CLOCK);
 
 void setup(){
-  //Serial.begin(38400);
+  /*
+  Serial.begin(9600);
+  while(!Serial);
+  delay(2000);
+  */
   lcdKeys.begin();//initialize all
   lcdKeys.setColor(0,BR_GREEN);//switch no,color
 //  lcdKeys.printImage(0,exit_img);//switch no,image
-  //lcdKeys.setFont(font8x8);
+  //lcdKeys.setFont(SystemFont5x7);
+  //lcdKeys.setFont(squarer10x11);
+  lcdKeys.setFont(block10x7);
 //  delay(1000);
 //  lcdKeys.clear(0);
 //  lcdKeys.refresh(0);
   //lcdKeys.fillRect(0,0,31,15,0);
-  //lcdKeys.drawPixel(31,15);
-  lcdKeys.drawRect(0,0,31,15);
-lcdKeys.setCursor(5,5);
-lcdKeys.print("Ab12");
+  //lcdKeys.drawPixel(0,0);
+  //lcdKeys.drawRect(0,0,31,15);
+lcdKeys.setCursor(1,1);
+lcdKeys.print("01");
 //  lcdKeys.drawRect(0,0,15,15);
 //  lcdKeys.drawRect(16,0,6,15);
 //  lcdKeys.fillRect(16,0,6,8);
+lcdKeys.invertBuffer();
   lcdKeys.refresh(0);
 }
 
@@ -61,4 +74,5 @@ void loop() {
   if (lcdKeys.getError() > 0){
     //Serial.println("error");
   }
+
 }
