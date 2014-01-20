@@ -5,10 +5,10 @@
 |___/ \__,_||_| |_| |_| \___/  \__|\___/  \__, |
                                           |___/ 
 										  
-	screenkeys - A Library and Hardware (For Teensy3.x) to drive 1..64 LCD ScreenKeys buttons with 6..7 wires
+	screenkeys - A Library & Hardware (For Teensy3.x) for drive 1..64 LCD ScreenKeys buttons with few wires
 ---------------------------------------------------------------------------------------------------------------------
 Version history:
-0.3b1
+0.4b1
 ---------------------------------------------------------------------------------------------------------------------
 		Copyright (c) 2014, s.u.m.o.t.o.y [sumotoy(at)gmail.com]
 ---------------------------------------------------------------------------------------------------------------------
@@ -16,7 +16,8 @@ Version history:
     screenkeys Library is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+    (at your option) any later version. You cannot use for commercial producs
+	or military purposes!
 
     screenkeys Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -29,13 +30,17 @@ Version history:
 	Small code portions from Adafruit (Adafruit_GFX).
 	https://github.com/adafruit/Adafruit-GFX-Library
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	Version:0.3b1
+	Version:0.4b1
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	Attention! This library needs gpio_expander library
+	Attention! This library needs sumotoy gpio_expander library
 	https://github.com/sumotoy/gpio_expander
 	-------------------------------------------------------------
-	Hardware:
-	Will coming soon...
+	Hardware needed:
+	schematics coming soon...
+	-------------------------------------------------------------
+	Pins used:
+	MOSI,MISO,SCK, a common CS pin for all GPIO's,an INT and a selectable pin for CLK
+	So 3 can be shared with other stuff, only 3 are really necessary!!!
 */
 
 #ifndef _SCREENKEYS_XX_H_
@@ -55,20 +60,41 @@ Version history:
 	#define memcpy_P memcpy
 	static inline uint8_t pgm_read_byte(const void *addr) { return *((uint8_t *)addr); }
 #endif
+
+
 //------------------ External Clock Enable -----------------
-//if you are using an external clock and you don't want generate internally, uncomment it
-//#define	__USEEXTCLK
+//if you are using an external clock and you don't want generate internally.
+
+#define	__USEEXTCLK//if defined you force library to don't generate it(1 pin less)
+
 //------------------ Debug Routines ------------------------
 //this is used only for debug purposes
+
 //#define 	_DBG
+
 //----------------- Text Options ---------------------------
 //there's a small routine that clear before write any char, useful for mainly large screens
+
 //#define _PRECLN
+
+//----------------- Switches Engine ---------------------------
+//You MUST specify here the max number of switches your design it's using!
+//Set 0 if you plan to use an external way to check switches
+
+#define	SWITCHLIMIT	16//0:disable switches, 1...64 range
+
+//----------------- Switches Handle ---------------------------
+//Here you can define if you plan to use an external way to handle the switches.
+//In this way the library handle only LCD and you provide a custom way to handle switches
+
+//#define	EXTSWITCH	//When defined it will enable an external handle of switch
+
 // ---------------- Pixel Engine ---------------------------
 //Pixel engine write directly in a buffer, here you can choose
 //the preferred method. Some font it's reversed or specular so the engine can
 //switch method on the fly and come back to the default method.
-//Do not touch these numbers
+//Do not touch following numbers
+
 //#define TL_ORIGIN//		0
 //#define BR_ORIGIN//		1
 #define BL_ORIGIN// 		2//normal operations
@@ -97,9 +123,7 @@ public:
 	void 			drawFastHLine(uint8_t x,uint8_t y,uint8_t w,bool color=BLACK);
 	void 			drawRect(uint8_t x,uint8_t y,uint8_t w,uint8_t h,bool color=BLACK);
 	void 			fillRect(uint8_t x,uint8_t y,uint8_t w,uint8_t h,bool color=BLACK);
-	
 	void 			drawCircle(uint8_t x0, uint8_t y0, uint16_t r,bool color=BLACK);
-
 	void 			fillCircle(uint8_t x0, uint8_t y0, uint16_t r,bool color=BLACK);
 	void 			drawRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16_t r, bool color=BLACK);
 	void 			fillRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16_t r, bool color=BLACK);
@@ -110,8 +134,8 @@ public:
 	#endif
 	void 			invertBuffer();
 protected:
-	uint8_t 				_width;
-	uint8_t 				_height;
+	uint8_t 				_width;//this can be different if rotation is set
+	uint8_t 				_height;//this can be different if rotation is set
 	uint8_t 				_cursor_x;
 	uint8_t 				_cursor_y;
 	uint8_t 				_rotation;
@@ -119,8 +143,8 @@ protected:
 	bool					_foreground;
 	bool					_background;
 	boolean 				_wrap;
-	uint8_t 				_XRES;
-	uint8_t 				_YRES;
+	uint8_t 				_XRES;//This is specific of the Screenkey used. It's the X resolution
+	uint8_t 				_YRES;//This is specific of the Screenkey used. It's the Y resolution
 	uint8_t 				_buffer[64];
 	uint8_t					_bufferAddressing;
 	const unsigned char * 	_font;
@@ -128,14 +152,14 @@ protected:
 	uint8_t					_dbg;
 	#endif
 private:
-	void 			drawCircleHelper(uint8_t x0,uint8_t y0,uint8_t r,uint8_t cornername,bool color);
-	void 			fillCircleHelper(uint8_t x0, uint8_t y0, uint16_t r, uint8_t cornername, int16_t delta, bool color);
-	uint8_t 		drawChar2(uint8_t x,uint8_t y, unsigned char c,bool colour, bool background=WHITE);
-	uint8_t 		charWidth(unsigned char c);
-	void			clearBuffer();
+	void 					drawCircleHelper(uint8_t x0,uint8_t y0,uint8_t r,uint8_t cornername,bool color);
+	void 					fillCircleHelper(uint8_t x0, uint8_t y0, uint16_t r, uint8_t cornername, int16_t delta, bool color);
+	uint8_t 				drawChar(uint8_t x,uint8_t y, unsigned char c,bool colour, bool background=WHITE);
+	uint8_t 				charWidth(unsigned char c);
+	void					clearBuffer();
 	
 	#if defined(_DBG)
-	void 			setDbg(uint8_t data);
+	void 					setDbg(uint8_t data);
 	#endif
 	struct FontHeader {
 		uint16_t size;			//0
@@ -145,6 +169,7 @@ private:
 		uint8_t charCount;		//4
 	};
 	//
+	//static void 			intFunction();
 };
 
 #endif

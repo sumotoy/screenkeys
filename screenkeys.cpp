@@ -365,7 +365,7 @@ size_t screenkeys::write(uint8_t c){
 		} else if (c == '\r') {	
 		} else {
 			//scrive il carattere e riceve il suo ingombro!
-			int charWide = drawChar2(_cursor_x, _cursor_y, c, _foreground, _background);
+			int charWide = drawChar(_cursor_x, _cursor_y, c, _foreground, _background);
 			if (charWide > 0) {//carattere scritto,cancelliamo un pezzo di quello che segue per evitare sporcature
 				#if defined(_PRECLN)
 				drawFastVLine(_cursor_x + charWide, _cursor_y, _cursor_y + header.height-1, _background);
@@ -375,7 +375,7 @@ size_t screenkeys::write(uint8_t c){
 	return 1;
 }
 
-uint8_t screenkeys::drawChar2(uint8_t x,uint8_t y, unsigned char c,bool colour,bool _background){
+uint8_t screenkeys::drawChar(uint8_t x,uint8_t y, unsigned char c,bool colour,bool _background){
 	if (x >= _width || y >= _height) {
 		return 0;
 	}
@@ -460,3 +460,7 @@ uint8_t screenkeys::charWidth(unsigned char c) {
 	return width;
 }
 
+/*
+static void screenkeys::intFunction() {
+}
+*/

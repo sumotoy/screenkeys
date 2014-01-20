@@ -18,6 +18,10 @@ getWidth	KEYWORD2
 getHeight	KEYWORD2
 getRotation	KEYWORD2
 setRotation	KEYWORD2
+setTextWrap	KEYWORD2
+setTextSize	KEYWORD2
+setTextColor	KEYWORD2
+setCursor	KEYWORD2
 drawPixel	KEYWORD2
 drawLine	KEYWORD2
 drawFastVLine	KEYWORD2
@@ -29,12 +33,12 @@ fillCircle	KEYWORD2
 drawRoundRect	KEYWORD2
 fillRoundRect	KEYWORD2
 setFont	KEYWORD2
+invertBuffer	KEYWORD2
 refresh	KEYWORD2
+printImage	KEYWORD2
 setColor	KEYWORD2
 fill	KEYWORD2
 clear	KEYWORD2
-printImage	KEYWORD2
-
 
 #######################################
 # Constants (LITERAL1)
