@@ -45,9 +45,9 @@ With 48 switches (this means 48 tiny LCD screens!!!) Teensy3 resources are used 
 
 Screenkeys are designed as Button with programmable custom graphics, not really a classic LCD! They are not designed for animations or fast updates on several buttons. Once you sent screen buffer to button it will remain steady until you change it's content (thanks to the refreshing clock) so it's simply a waste of resources and memory assign to every button a separate buffer. Each buffer it 64 bytes, 512bits, small for a classic processor but a lot for a tiny microcontroller! Every graphic function in library works on a single buffer and just to the end you will have to call the refresh command that will send to the choosed button the screen content so procedure to write over several buttons are slight different from a common graphic lcd screen.<br>
 
-1) Before create something, clear buffer.
-2) Write what you want. You can even load the buffer with s bitmap graphics.
-3) Send the buffer to the desired button.
+1) Before create something, clear buffer.<br>
+2) Write what you want. You can even load the buffer with s bitmap graphics.<br>
+3) Send the buffer to the desired button.<br>
 
 And so on...<br>
 It's clear obvius that you cannot refresh all buttons in one time but you need to do this procedure for each button but this it's fast enough to result as a realtime to human eyes, even with 64 buttons!
