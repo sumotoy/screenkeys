@@ -81,7 +81,7 @@ Version history:
 //You MUST specify here the max number of switches your design it's using!
 //Set 0 if you plan to use an external way to check switches
 
-#define	SWITCHLIMIT	16//0:disable switches, 1...64 range
+#define	SWITCHLIMIT	8//0:disable switches, 1...64 range
 
 //----------------- Switches Handle ---------------------------
 //Here you can define if you plan to use an external way to handle the switches.

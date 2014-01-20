@@ -48,12 +48,14 @@ void LC16::begin(bool protocolInitOverride) {
 		digitalWrite(_clockEnable,HIGH);
 		//GPIO's setup
 		//now set the direction for each GPIO
-		#if SWGPIOS == 1 //in this case only, half GPIO will be used for switches
+		#if SWGPIOS < 2 //in this case only, half GPIO will be used for switches
 			_gpios_out[0].postSetup(_cs,_adrs);
 			_gpios_out[0].begin(protocolInitOverride);
 			delay(100);
 			_gpios_out[0].gpioPinMode(0b1111111100000000);//A=OUT,B=IN
 			_gpios_out[0].gpioPort(0xFFFF);
+			#if not defined EXTSWITCH
+			#endif
 		#else
 			for (uint8_t i=0;i<(SWGPIOS/2);i++){//set outs
 				_gpios_out[i].postSetup(_cs,_adrs+(1*i));//20,21,22,23.
@@ -62,7 +64,7 @@ void LC16::begin(bool protocolInitOverride) {
 				_gpios_out[i].gpioPinMode(OUTPUT);
 				_gpios_out[i].gpioPort(0xFFFF);
 			}
-			#if defined EXTSWITCH
+			#if not defined EXTSWITCH
 				for (uint8_t i=0;i<(SWGPIOS/2);i++){//set ins
 					_gpios_in[i].postSetup(_cs,_adrs+(SWGPIOS/2)+(1*i));//24,25,26,27.
 					_gpios_in[i].begin(protocolInitOverride);
@@ -115,8 +117,6 @@ void LC16::progEnable(boolean mode){
   */
 }
 
-
-
 void LC16::_sendGpio(uint8_t chip,uint16_t data){
 	#if SWGPIOS > 1
 		_gpios_out[chip].gpioPort(data);//send to gpio
@@ -128,7 +128,7 @@ void LC16::_sendGpio(uint8_t chip,uint16_t data){
 
 //used to calculate at witch GPIO chip instance belongs the key
 uint8_t LC16::_witchGpio(uint8_t key){
-	#if SWGPIOS == 1
+	#if SWGPIOS < 2
 		return 0;
 	#else
 	if (key >= SWITCHLIMIT) return 255;
@@ -160,38 +160,27 @@ void LC16::sendData(uint8_t key,unsigned char cDataByte, unsigned char cParity){
 	cParity = cParity & 0x01;
 	//First send 1 start bit
 	bitClear(temp,key);
-	//mcp1.gpioPort(temp);//send to gpio
-	_sendGpio(chip,temp);
-	//_gpios_out[chip].gpioPort(temp);//send to gpio
+	_sendGpio(chip,temp);//send
 	//Set data up
-	PClock(1) ;
-	//Toggle clock line
+	PClock(1);//Toggle clock line
 	//Now send 8 data bits - lsb first
 	for(i = 0; i < 8; i++) {
 		//Get lsb of data
 		cBit = (cDataByte & 0x01);
 		bitWrite(temp,key,cBit);
-		//mcp1.gpioPort(temp);//send to gpio
 		_sendGpio(chip,temp);
-		//_gpios_out[chip].gpioPort(temp);//send to gpio
 		PClock(1) ; 
 		//Shift data right to ready next bit
 		cDataByte = cDataByte >> 1 ;
 	}
 	//Send computed parity bit
 	bitWrite(temp,key,cParity);
-	//mcp1.gpioPort(temp);//send to gpio
 	_sendGpio(chip,temp);
-	//_gpios_out[chip].gpioPort(temp);//send to gpio
 	PClock(1) ;
 	bitSet(temp,key);
-	//mcp1.gpioPort(temp);//send to gpio
 	_sendGpio(chip,temp);
-	//_gpios_out[chip].gpioPort(temp);//send to gpio
 	PClock(1) ;
-	//mcp1.gpioPort(temp);//send to gpio
 	_sendGpio(chip,temp);
-	//_gpios_out[chip].gpioPort(temp);//send to gpio
 	PClock(1) ;
 	progEnable(false);//reconnect main clock
 } 
@@ -215,15 +204,6 @@ void LC16::sendWord(uint8_t key,byte reg,byte val1,byte val2){
 
 //LC16 initialization routine
 void LC16::init_lcdChip(uint8_t key){
-/*
-  _width = XRES;
-  _height = YRES;
-  _cursor_x = 0;
-  _cursor_y = 0;
-  _textsize = 1;
-  _rotation = 0;
-  _wrap = true;
-  */
   sendByte(key,LC_FREQREG,SCRKEY_CLK);//Frequency scan
   sendWord(key,LC_MUXREG,0x02,0x05);//set mux (LC16)
   clear();
