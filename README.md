@@ -2,7 +2,7 @@ screenkeys
 ==========
 
 Hardware & Software for drive 1..64 LCD Screenkeys LC button with Teensy3.x<br>
-![Alt text](http://i1189.photobucket.com/albums/z437/theamra/libraries/e1564993-de34-4369-8f7f-b6e67d567249.jpg "LC16")<br>
+![image](http://i1189.photobucket.com/albums/z437/theamra/libraries/e1564993-de34-4369-8f7f-b6e67d567249.jpg "LC16")<br>
 
 <b>What is a Screenkey?</b><br>
 
@@ -33,6 +33,17 @@ Graphics methods works around a pixel engine that write directly into the buffer
 I have tested library and hardware with 48 switches and works like a charm, it can support max 64 switches.
 With 48 switches (this means 48 tiny LCD screens!!!) Teensy3 resources are used at 1 to 5%, not bad and I was right to choose the direct switch identification instead of a matrix, for the price of these switches I really need multiple key ident, not possible with matrix (oops, possibly but with several restrictions)<br>
 
+<b>64Keys, 1 buffer??:</b><br>
+
+Screenkeys are designed as Button with programmable custom graphics, not really a classic LCD! They are not designed for animations or fast updates on several buttons. Once you sent screen buffer to button it will remain steady until you change it's content (thanks to the refreshing clock) so it's simply a waste of resources and memory assign to every button a separate buffer. Each buffer it 64 bytes, 512bits, small for a classic processor but a lot for a tiny microcontroller! Every graphic function in library works on a single buffer and just to the end you will have to call the refresh command that will send to the choosed button the screen content so procedure to write over several buttons are slight different from a common graphic lcd screen.<br>
+
+1) Before create something, clear buffer.
+2) Write what you want. You can even load the buffer with s bitmap graphics.
+3) Send the buffer to the desired button.
+
+And so on...<br>
+It's clear obvius that you cannot refresh all buttons in one time but you need to do this procedure for each button but this it's fast enough to result as a realtime to human eyes, even with 64 buttons!
+
 -----------------------------------------------------------------------------------------<br>
 
 <b>Features:</b><br>
@@ -61,12 +72,12 @@ With 48 switches (this means 48 tiny LCD screens!!!) Teensy3 resources are used 
 
 <b>Development Status:</b><br>
 
-<b>0.3b1:</b>
+<b>0.4b1:</b>
 
  - [x] Screenkey low level routines.
  - [x] Graphic routines.
  - [x] Text routines.
- - [ ] 64 Screenkeys addressing. (actually 8 supported for test)
+ - [x] 64 Screenkeys addressing. (actually 8 supported for test)
  - [ ] Switch Scan routines.
 
 
