@@ -19,8 +19,16 @@ I got some hundreds of these keys from an auction so I decided to design somethi
 
 Forget Arduino uno et similar, they simply have insufficent resources, so I choosed one
 of my preferred Micro around, Teensy3.x from <b>Paul Stoffregen</b> http://www.pjrc.com/store/teensy3.html that it's a 32bit tiny microcontroller with a lot of features and much better supported than gigantic and expensive Arduino Due.<br>
-To get around the clock problem and syncro program I choosed to use 2 clocks that can be switched automatically by microcontroller and it worked well. Then I decided to use some SPI 16bit gpio's from Microchip, the MCP23s17 that it's faster than SR and uses a unique feature called HAEN that le me share all pins between chips so only 3 pins are needed for detecting 64 switches individually and I have the data line for each switch as well. For this purpose I coded recently a library here that let me drive many of those chips. I just added a couple of buffers for the clock and a level translator for Teensy3.<br>
+To get around the clock problem by choosing to use 2 clocks that can be switched automatically by microcontroller and it worked well. Then I decided to use some SPI 16bit gpio's from Microchip, the MCP23s17 that it's faster than SR and I2C and uses a unique feature called HAEN that let me share all pins between chips so only 3 pins are needed for detecting 64 switches individually and I have the data line for each switch as well. For this purpose I coded recently a library here that let me drive many of those chips. I just added a couple of buffers for the clock and a level translator for Teensy3.<br>
 I choosed a refreshing clock between 500Khz to 2Mhz, a task that for Teesy3 it's pretty easy but I got the same results even if I tried to use a dedicated oscillator, just need to inform Micro at what speed I'm driving LCD's.<br>
+In conclusion, the pins needed are:<br>
+MISO,MOSI,SCK from SPI that can be shared with other periferals.<br>
+A dedicated CS pin for all GPIO's<br>
+A dedicated pin with INT capabilities for all GPIO connected to the keyscan.<br>
+A dedicated pin for Clock Enable.<br>
+A dedicated pin for Clock Programming.<br>
+Only 4 pin dedicated for 64 buttons with 64 lcd... not bad, I can live with it!<br>
+
 
 <b>Software Design:</b><br>
 
