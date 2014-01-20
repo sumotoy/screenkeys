@@ -46,8 +46,8 @@ public:
 	void			refresh(uint8_t key);
 	void 			printImage(uint8_t key, unsigned char * data);
 	void 			setColor(uint8_t key,byte color);
-	void 			fill(uint8_t key,uint8_t color);
-	void 			clear(uint8_t key);
+	void 			fill(uint8_t color);
+	void 			clear();
 	uint8_t			getError();
 private:
     uint8_t 		_cs;

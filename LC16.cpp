@@ -226,7 +226,7 @@ void LC16::init_lcdChip(uint8_t key){
   */
   sendByte(key,LC_FREQREG,SCRKEY_CLK);//Frequency scan
   sendWord(key,LC_MUXREG,0x02,0x05);//set mux (LC16)
-  clear(key);
+  clear();
   refresh(key);
   setColor(key,BL_NONE);
   
@@ -255,7 +255,7 @@ void LC16::setColor(uint8_t key,byte color){
 }
 
 //fill the buffer with a specific color
-void LC16::fill(uint8_t key,uint8_t color){
+void LC16::fill(uint8_t color){
 	unsigned char col = 0xFF;	//Mmmm...
 	if (color != 0) col = 0x00; //Mmmmmm... again...
 	for (uint8_t i=0; i<LC16_BFSIZE; i++){
@@ -264,6 +264,6 @@ void LC16::fill(uint8_t key,uint8_t color){
 }
 
 //fill the buffer with white
-void LC16::clear(uint8_t key){
-	fill(key,WHITE);
+void LC16::clear(){
+	fill(WHITE);
 }
