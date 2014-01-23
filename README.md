@@ -92,3 +92,6 @@ It's clear obvius that you cannot refresh all buttons in one time but you need t
 
 
 For commercial purposes and licence questions please contact me.
+![image](http://i1189.photobucket.com/albums/z437/theamra/libraries/lc16_design.jpg "LC16")<br>
+This is the 16 switch board with expansion IDC connector for expand in bloks of 16. Other boards design coming next allow 8 inline buttons expandable.
+
