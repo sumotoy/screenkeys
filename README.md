@@ -81,17 +81,19 @@ It's clear obvius that you cannot refresh all buttons in one time but you need t
 
 <b>Development Status:</b><br>
 
-<b>0.4b1:</b>
+<b>0.5b7:</b>
 
  - [x] Screenkey low level routines.
  - [x] Graphic routines.
  - [x] Text routines.
  - [x] 64 Screenkeys addressing. (actually 8 supported for test)
- - [ ] Switch Scan routines.
+ - [d] Switch Scan routines. (only 1 GPIO mode, aka 8 switches, with current beta/development)
 
 
 
-For commercial purposes and licence questions please contact me.
+For commercial purposes and licence questions please contact me.(sumotoy < at > gmail.com)
 ![image](http://i1189.photobucket.com/albums/z437/theamra/libraries/lc16_design.jpg "LC16")<br>
-This is the 16 switch board with expansion IDC connector for expand in bloks of 16. Other boards design coming next allow 8 inline buttons expandable.
+This is the 16 switch board.<br>
+This board has all the needed electronics onboard and works with Teensy3.0 as well Teensy3.1. Has internal level converters and IDC 10 pin connector to expand in bloks of 16 switches by using the same wires with teensy. The expansions has less chip needed since this one mounts level converters and oscillator logic that it's common to all boards so they need only 2 GPIO's extra for each 16 switches.<br>
+Other boards design, coming next, allow 8 inline buttons and are more compact but drivers are all mounted in a doughter board and all components are SMD.
 
