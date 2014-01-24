@@ -82,13 +82,13 @@ It's clear obvius that you cannot refresh all buttons in one time but you need t
 
 <b>Development Status:</b><br>
 
-<b>0.5b8:</b>
+<b>0.6b1:</b>
 
  - [x] Screenkey low level routines.
  - [x] Graphic routines.
  - [x] Text routines.
  - [x] 64 Screenkeys addressing.
- - [d] Switch Scan routines. (with this beta only 1 GPIO mode, aka 8 switches)
+ - [d] Switch Scan routines. working 1 GPIO mode, not tested multiple GPIO mode
 
 
 
