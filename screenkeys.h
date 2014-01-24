@@ -49,6 +49,7 @@ Version history:
 #include <inttypes.h>
 #include <Arduino.h>
 #include "Print.h"
+//#include "membuf.h"
 
 #define swap(a, b) { int8_t t = a; a = b; b = t; }
 
@@ -60,6 +61,8 @@ Version history:
 	#define memcpy_P memcpy
 	static inline uint8_t pgm_read_byte(const void *addr) { return *((uint8_t *)addr); }
 #endif
+#define nop asm volatile ("nop\n\t")
+
 /*
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ........................... GPIO CONNECTIONS .............................
@@ -182,7 +185,8 @@ protected:
 	boolean 				_wrap;
 	uint8_t 				_XRES;//This is specific of the Screenkey used. It's the X resolution
 	uint8_t 				_YRES;//This is specific of the Screenkey used. It's the Y resolution
-	uint8_t 				_buffer[64];
+	//volatile uint8_t 		_buffer[64];
+	static volatile uint8_t _buffer[];
 	uint8_t					_bufferAddressing;
 	const unsigned char * 	_font;
 	uint8_t					_switches;
@@ -194,7 +198,7 @@ private:
 	void 					fillCircleHelper(uint8_t x0, uint8_t y0, uint16_t r, uint8_t cornername, int16_t delta, bool color);
 	uint8_t 				drawChar(uint8_t x,uint8_t y, unsigned char c,bool colour, bool background=WHITE);
 	uint8_t 				charWidth(unsigned char c);
-	void					clearBuffer();
+	//void					clearBuffer();
 	
 #if defined(_DBG)
 	void 					setDbg(uint8_t data);

@@ -61,6 +61,7 @@ void LC16::begin(bool protocolInitOverride) {
 		#if SWGPIOS < 2 //in this case only, half GPIO can be used for switches
 			_gpios_out[0].postSetup(_cs,_adrs);
 			_gpios_out[0].begin(protocolInitOverride);
+			//delay(10);
 			#ifndef EXTSWITCH//Using internal switch scan so BankA as Out and BankB as IN
 				_gpios_out[0].gpioRegisterWriteByte(_gpios_out[0].IOCON,0b00101000);//set conf
 				_gpios_out[0].gpioPinMode(0b1111111100000000);//set in/out direction A=OUT,B=IN
@@ -82,12 +83,14 @@ void LC16::begin(bool protocolInitOverride) {
 				for (i=0;i<(SWGPIOS/2);i++){//first half, GPIO's as OUT
 					_gpios_out[i].postSetup(_cs,_adrs+(1*i));//20,21,22,23.
 					_gpios_out[i].begin(protocolInitOverride);
+					//delay(10);
 					_gpios_out[i].gpioPinMode(OUTPUT);//A=OUT,B=OUT
 					_gpios_out[i].gpioPort(0xFFFF);//pullup
 				}
 				for (i=0;i<(SWGPIOS/2);i++){//second half, GPIO's as IN
 					_gpios_in[i].postSetup(_cs,_adrs+(SWGPIOS/2)+(1*i));//24,25,26,27.
 					_gpios_in[i].begin(protocolInitOverride);
+					delay(10);
 					_gpios_in[i].gpioRegisterWriteByte(_gpios_in[i].IOCON,0b00101000);//set conf
 					_gpios_in[i].gpioPinMode(INPUT);//A=IN,B=IN
 					_gpios_in[i].gpioRegisterWriteWord(_gpios_in[i].GPPU,0xFFFF);//set pullup on all pins (use pullup command? will check later)
@@ -112,6 +115,7 @@ void LC16::begin(bool protocolInitOverride) {
 		//now the MCU has full control of GPIO's and Clock logic, we can initialize Screenkeys modules
 		for (i=0;i<_switches;i++){
 			init_lcdChip(i);//init each switch
+			nop;
 		}
 	}
 }
@@ -126,7 +130,9 @@ void LC16::PClock(uint8_t cTicks){
   uint8_t i;
   for(i = 0; i < cTicks; i++) {
     digitalWriteFast(_programClock,LOW);//CLK_toggle
+	nop;
     digitalWriteFast(_programClock,HIGH);//CLK_toggle
+	nop;
   }
 } 
 
@@ -246,7 +252,7 @@ void LC16::printImage(uint8_t key, unsigned char * data){
 
 //instruct to print the buffer content
 void LC16::refresh(uint8_t key){
-	printImage(key,_buffer);
+	printImage(key,(unsigned char *)_buffer);
 }
 
 //change background color
