@@ -67,6 +67,7 @@ It's clear obvius that you cannot refresh all buttons in one time but you need t
 - Can send/receive infos in I2C,RS485,Ethernet or as USB Hid/Keyboard trough Teensy3 programming.
 - Interfacing with 3V3 or 5V systems.
 - Identify multiple buttons pressed.
+- If internal keyscan is not used it can be expanded to 128 switches.
 
 <b>FAQ:</b><br>
 <dl>
@@ -75,19 +76,19 @@ It's clear obvius that you cannot refresh all buttons in one time but you need t
   <dt>How many switches support?</dt>
   <dd>Actually 64 but can be exanded even more.</dd>
   <dt>Can work with other Microcontrollers?</dt>
-  <dd>can be... But Teensy £.x it's perfect for this project and arduinos are not in my todo list.</dd>
+  <dd>can be... But Teensy 3.x it's perfect for this project and arduinos are not in my todo list.</dd>
 </dl>
 
 
 <b>Development Status:</b><br>
 
-<b>0.5b7:</b>
+<b>0.5b8:</b>
 
  - [x] Screenkey low level routines.
  - [x] Graphic routines.
  - [x] Text routines.
- - [x] 64 Screenkeys addressing. (actually 8 supported for test)
- - [d] Switch Scan routines. (only 1 GPIO mode, aka 8 switches, with current beta/development)
+ - [x] 64 Screenkeys addressing.
+ - [d] Switch Scan routines. (with this beta only 1 GPIO mode, aka 8 switches)
 
 
 
