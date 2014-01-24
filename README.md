@@ -95,6 +95,6 @@ It's clear obvius that you cannot refresh all buttons in one time but you need t
 For commercial purposes and licence questions please contact me.(sumotoy < at > gmail.com)
 ![image](http://i1189.photobucket.com/albums/z437/theamra/libraries/lc16_design.jpg "LC16")<br>
 This is the 16 switch board.<br>
-This board has all the needed electronics and works with Teensy3.0 as well Teensy3.1. Has internal level converters and IDC 10 pin connector to expand in bloks of 16 switches by shared the same wires. The expansions has less chips since this one mounts level converters and oscillator logic that it's common to all boards so they need only 2 GPIO's extra for every 16 switches plus a buffer.<br>
+This board has all the needed electronics and works with Teensy3.0 as well Teensy3.1, it has been designed to use DIP ic's so it's easy to buildup. Has internal level converters and IDC 10 pin connector to expand in bloks of 16 switches by shared the same wires. The expansions has less chips since this one mounts level converters and oscillator logic that it's common to all boards so they need only 2 GPIO's extra for every 16 switches plus a buffer.<br>
 Other boards design, coming next, allow 8 inline buttons and are more compact but drivers are all mounted in a doughter board and all components are SMD.
 
