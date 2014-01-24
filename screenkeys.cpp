@@ -31,7 +31,7 @@ void screenkeys::clearBuffer() {
 	}	
 }
 
-void screenkeys::invertBuffer() {
+void screenkeys::invert() {
 	for (uint8_t i=0;i<64;i++){
 		_buffer[i] ^= 0xFF;
 	}	

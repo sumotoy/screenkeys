@@ -33,12 +33,13 @@ fillCircle	KEYWORD2
 drawRoundRect	KEYWORD2
 fillRoundRect	KEYWORD2
 setFont	KEYWORD2
-invertBuffer	KEYWORD2
+invert	KEYWORD2
 refresh	KEYWORD2
 printImage	KEYWORD2
 setColor	KEYWORD2
 fill	KEYWORD2
 clear	KEYWORD2
+keypressScan	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

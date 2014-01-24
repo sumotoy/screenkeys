@@ -3,17 +3,20 @@
 #include <Arduino.h>
 #include "LC16.h"
 
+#ifndef EXTSWITCH
+volatile bool LC16::_keyPressed = false;
+#endif
 
 // Instance
 //mainly this set some var and check for possible range error
 LC16::LC16(const uint8_t switches,const uint8_t csPin,const uint8_t startAdrs,const uint8_t prgClock,const uint8_t clkEnable){
 	_width = _XRES = LC16_XRES;
 	_height = _YRES = LC16_YRES;
-  _cursor_x = 0;
-  _cursor_y = 0;
-  _textsize = 1;
-  _rotation = 0;
-  _wrap = true;
+	_cursor_x = 0;
+	_cursor_y = 0;
+	_textsize = 1;
+	_rotation = 0;
+	_wrap = true;
 	_cs = csPin;
 	if (startAdrs >= 0x20 && startAdrs <= 0x26){//HAEN works between 0x20...0x27, reserve 1 for keyscan
 		_adrs = startAdrs;
@@ -51,11 +54,24 @@ void LC16::begin(bool protocolInitOverride) {
 		#if SWGPIOS < 2 //in this case only, half GPIO will be used for switches
 			_gpios_out[0].postSetup(_cs,_adrs);
 			_gpios_out[0].begin(protocolInitOverride);
+			#ifndef EXTSWITCH
+				_gpios_out[0].gpioRegisterWriteByte(_gpios_out[0].IOCON,0b00101000);//set conf
+				_gpios_out[0].gpioPinMode(0b1111111100000000);//set in/out direction
+				_gpios_out[0].gpioRegisterWriteWord(_gpios_out[0].GPPU,0b1111111100000000);//set pullup on Bank B (use pullup command?)
+				_gpios_out[0].gpioRegisterWriteWord(_gpios_out[0].IPOL,0b1111111100000000);// invert polarity bank B
+				_gpios_out[0].gpioRegisterWriteWord(_gpios_out[0].GPINTEN,0b1111111100000000);// enable all interrupt in Bank B
+				_gpios_out[0].gpioRegisterRead(_gpios_out[0].INTCAP+1);// read from interrupt B, capture ports to clear them
+				pinMode (INTpin, INPUT);
+				digitalWrite (INTpin, HIGH);
+				enableKeyInt(keypress);
+				_keyPressed = false;
+				
+			#else
+			#endif
 			delay(100);
 			_gpios_out[0].gpioPinMode(0b1111111100000000);//A=OUT,B=IN
 			_gpios_out[0].gpioPort(0xFFFF);
-			#if not defined EXTSWITCH
-			#endif
+			
 		#else
 			for (uint8_t i=0;i<(SWGPIOS/2);i++){//set outs
 				_gpios_out[i].postSetup(_cs,_adrs+(1*i));//20,21,22,23.
@@ -64,7 +80,7 @@ void LC16::begin(bool protocolInitOverride) {
 				_gpios_out[i].gpioPinMode(OUTPUT);
 				_gpios_out[i].gpioPort(0xFFFF);
 			}
-			#if not defined EXTSWITCH
+			#ifndef EXTSWITCH
 				for (uint8_t i=0;i<(SWGPIOS/2);i++){//set ins
 					_gpios_in[i].postSetup(_cs,_adrs+(SWGPIOS/2)+(1*i));//24,25,26,27.
 					_gpios_in[i].begin(protocolInitOverride);
@@ -247,3 +263,36 @@ void LC16::fill(uint8_t color){
 void LC16::clear(){
 	fill(WHITE);
 }
+
+
+#ifndef EXTSWITCH
+
+void LC16::keypress(){
+	_keyPressed = true;
+}
+
+
+uint8_t LC16::keypressScan(){
+	if (_keyPressed){
+		disableKeyInt();
+		uint8_t val = 0;
+		delay(30);  // de-bounce before we re-enable interrupts
+		#if SWGPIOS < 2
+		if (_gpios_out[0].gpioRegisterRead(_gpios_out[0].INTF+1)) val |= _gpios_out[0].gpioRegisterRead(_gpios_out[0].INTCAP+1);
+		for (uint8_t sw = 0; sw < 8; sw++) {
+			if (val & (1 << sw)){
+				_keyPressed = false;
+				enableKeyInt(keypress);
+				return sw;
+			}
+		}
+		#else
+		#endif
+		enableKeyInt(keypress);
+		_keyPressed = false;
+		return 255;
+	} else {
+		return 255;
+	}
+}
+#endif

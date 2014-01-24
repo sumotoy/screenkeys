@@ -7,16 +7,7 @@
 #include <../SPI/SPI.h>//this chip needs SPI
 #include <../gpio_expander/mcp23s17.h>
 
-//witch pin for use internal clock generator (if you are not using an external generator)
-#ifndef __USEEXTCLK
-	#define MAIN_CLK_PIN	4
-//main clock frequency for the LCD's
-	#define CLK_FRQ    400000L//400Khz
-#endif
-//You need to set the following accordly the clock frequency (even if clock it's external!)
-#define		SCRKEY_CLK	0x60//For 400Khz! Read datasheet if you change the clock speed
-
-//----------------------------------------- Do NOT touch from here
+//----------------------------------------- Do NOT touch following
 // colors for LC16.2
 #define BL_NONE    0x00
 #define BR_GREEN   0x33
@@ -42,28 +33,44 @@ class LC16 : public screenkeys
 
 public:
 	LC16(const uint8_t switches,const uint8_t csPin,const uint8_t startAdrs,const uint8_t prgClock,const uint8_t clkEnable);
-	virtual void 	begin(bool protocolInitOverride=false);
-	void			refresh(uint8_t key);
-	void 			printImage(uint8_t key, unsigned char * data);
-	void 			setColor(uint8_t key,byte color);
-	void 			fill(uint8_t color);
-	void 			clear();
-	uint8_t			getError();
-private:
-    uint8_t 		_cs;
-	#ifndef __USEEXTCLK
-	uint8_t 		_mainClock;
+	virtual void 			begin(bool protocolInitOverride=false);
+	void					refresh(uint8_t key);
+	void 					printImage(uint8_t key, unsigned char * data);
+	void 					setColor(uint8_t key,byte color);
+	void 					fill(uint8_t color);
+	void 					clear();
+	uint8_t					getError();
+	#ifndef EXTSWITCH
+	uint8_t					keypressScan();
+    void 					enableKeyInt(void (*isr)()) __attribute__((always_inline)) {
+		//isrCallback = isr;
+		attachInterrupt(INTused,*isr,FALLING);
+    }
+    void 					disableKeyInt() __attribute__((always_inline)) {
+		detachInterrupt(INTused);
+    }
+	//void (*isrCallback)();
+	static void				keypress();
 	#endif
-	uint8_t 		_programClock;
-	uint8_t 		_clockEnable;
-	uint8_t 		_adrs;
-	uint8_t 		_units;
-	uint8_t 		_error;
-	void			_sendGpio(uint8_t key,uint16_t data);
-	uint8_t			_witchGpio(uint8_t key);
+protected:
+	#ifndef EXTSWITCH
+	static volatile  bool 	_keyPressed;
+	#endif
+private:
+    uint8_t 				_cs;
+	#ifndef __USEEXTCLK
+	uint8_t 				_mainClock;
+	#endif
+	uint8_t 				_programClock;
+	uint8_t 				_clockEnable;
+	uint8_t 				_adrs;
+	uint8_t 				_units;
+	uint8_t 				_error;
+	void					_sendGpio(uint8_t key,uint16_t data);
+	uint8_t					_witchGpio(uint8_t key);
 	
 // Instances for the esternal library....I know, it's messy!
-	mcp23s17		mcp1;
+	mcp23s17				mcp1;
 #if SWITCHLIMIT <= 0
 	#define		SWGPIOS		0
 	#error 		You must specify a range between 1 to 64!
@@ -130,16 +137,15 @@ private:
 	mcp23s17 _gpios_out[SWGPIOS/2] = {mcp1,mcp2,mcp3,mcp4};
 	mcp23s17 _gpios_in [SWGPIOS/2] = {mcp5,mcp6,mcp7,mcp8};
 #else
-	#error 		You must specify a range between 1 to 64!
 	#define		SWGPIOS		0
+	#error 		You must specify a range between 1 to 64!
 #endif
-	
-	void 			progEnable(boolean mode);
-	void 			PClock(uint8_t cTicks);
-	void 			sendData(uint8_t key,unsigned char cDataByte, unsigned char cParity);
-	void 			sendByte(uint8_t key,byte reg,byte val);
-	void 			sendWord(uint8_t key,byte reg,byte val1,byte val2);
-	void 			init_lcdChip(uint8_t key);
+	void 				progEnable(boolean mode);
+	void 				PClock(uint8_t cTicks);
+	void 				sendData(uint8_t key,unsigned char cDataByte, unsigned char cParity);
+	void 				sendByte(uint8_t key,byte reg,byte val);
+	void 				sendWord(uint8_t key,byte reg,byte val1,byte val2);
+	void 				init_lcdChip(uint8_t key);
 
 };
 #endif

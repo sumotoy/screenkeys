@@ -8,7 +8,7 @@
 	screenkeys - A Library & Hardware (For Teensy3.x) for drive 1..64 LCD ScreenKeys buttons with few wires
 ---------------------------------------------------------------------------------------------------------------------
 Version history:
-0.4b1
+0.5b8
 ---------------------------------------------------------------------------------------------------------------------
 		Copyright (c) 2014, s.u.m.o.t.o.y [sumotoy(at)gmail.com]
 ---------------------------------------------------------------------------------------------------------------------
@@ -30,7 +30,7 @@ Version history:
 	Small code portions from Adafruit (Adafruit_GFX).
 	https://github.com/adafruit/Adafruit-GFX-Library
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	Version:0.4b1
+	Version:0.5b8
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	Attention! This library needs sumotoy gpio_expander library
 	https://github.com/sumotoy/gpio_expander
@@ -61,12 +61,26 @@ Version history:
 	static inline uint8_t pgm_read_byte(const void *addr) { return *((uint8_t *)addr); }
 #endif
 
-
+/*
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+........................... SETUP .............................
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
 //------------------ External Clock Enable -----------------
 //if you are using an external clock and you don't want generate internally.
 
 #define	__USEEXTCLK//if defined you force library to don't generate it(1 pin less)
 
+//witch pin for use internal clock generator (if you are not using an external generator)
+#if defined(__USEEXTCLK)
+	#define MAIN_CLK_PIN	4
+//main clock frequency for the LCD's
+	#define CLK_FRQ    		400000L//400Khz
+#endif
+//------------------ Set clock divisor in relation of the choosed scan frequency -----------------
+//You need to set the following accordly the clock frequency (even if clock it's external!)
+//This is needed always!
+#define		SCRKEY_CLK		0x60//For 400Khz! Read datasheet if you change the clock speed
 //------------------ Debug Routines ------------------------
 //this is used only for debug purposes
 
@@ -81,14 +95,24 @@ Version history:
 //You MUST specify here the max number of switches your design it's using!
 //Set 0 if you plan to use an external way to check switches
 
-#define	SWITCHLIMIT	8//0:disable switches, 1...64 range
+#define	SWITCHLIMIT			8 // 0:disable switches, 1...64 range
 
 //----------------- Switches Handle ---------------------------
 //Here you can define if you plan to use an external way to handle the switches.
 //In this way the library handle only LCD and you provide a custom way to handle switches
 
 //#define	EXTSWITCH	//When defined it will enable an external handle of switch
-
+//------------------ INT PIN and INT --------------------------
+//scan engine uses an INT and PIN to detect a keypress, here you choose
+#ifndef EXTSWITCH
+	#define INTused 		2  // witch int you plan to use
+	#define INTpin 			2  // the pin associated to the int
+#endif
+/*
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+........................... END SETUP .............................
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
 // ---------------- Pixel Engine ---------------------------
 //Pixel engine write directly in a buffer, here you can choose
 //the preferred method. Some font it's reversed or specular so the engine can
@@ -108,31 +132,31 @@ class screenkeys : public Print {
 
 public:
 	screenkeys( );
-	virtual void 	begin(bool protocolInitOverride=false) = 0;
-	uint8_t 		getWidth(void);
-	uint8_t 		getHeight(void);
-	uint8_t 		getRotation(void);
-	void 			setRotation(uint8_t val);
-	void 			setTextWrap(boolean w);
-	void 			setTextSize(uint8_t s);
-	void 			setTextColor(uint8_t c);
-	void 			setCursor(uint8_t x, uint8_t y);
-	void 			drawPixel(uint8_t x, uint8_t y, bool color=BLACK);
-	void 			drawLine(uint8_t x0,uint8_t y0,uint8_t x1,uint8_t y1,bool color=BLACK);
-	void 			drawFastVLine(uint8_t x,uint8_t y,uint8_t h,bool color=BLACK);
-	void 			drawFastHLine(uint8_t x,uint8_t y,uint8_t w,bool color=BLACK);
-	void 			drawRect(uint8_t x,uint8_t y,uint8_t w,uint8_t h,bool color=BLACK);
-	void 			fillRect(uint8_t x,uint8_t y,uint8_t w,uint8_t h,bool color=BLACK);
-	void 			drawCircle(uint8_t x0, uint8_t y0, uint16_t r,bool color=BLACK);
-	void 			fillCircle(uint8_t x0, uint8_t y0, uint16_t r,bool color=BLACK);
-	void 			drawRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16_t r, bool color=BLACK);
-	void 			fillRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16_t r, bool color=BLACK);
-	void 			setFont(const unsigned char * fnt);
-	virtual size_t  write(uint8_t);
+	virtual void 			begin(bool protocolInitOverride=false) = 0;
+	uint8_t 				getWidth(void);
+	uint8_t 				getHeight(void);
+	uint8_t 				getRotation(void);
+	void 					setRotation(uint8_t val);
+	void 					setTextWrap(boolean w);
+	void 					setTextSize(uint8_t s);
+	void 					setTextColor(uint8_t c);
+	void 					setCursor(uint8_t x, uint8_t y);
+	void 					drawPixel(uint8_t x, uint8_t y, bool color=BLACK);
+	void 					drawLine(uint8_t x0,uint8_t y0,uint8_t x1,uint8_t y1,bool color=BLACK);
+	void 					drawFastVLine(uint8_t x,uint8_t y,uint8_t h,bool color=BLACK);
+	void 					drawFastHLine(uint8_t x,uint8_t y,uint8_t w,bool color=BLACK);
+	void 					drawRect(uint8_t x,uint8_t y,uint8_t w,uint8_t h,bool color=BLACK);
+	void 					fillRect(uint8_t x,uint8_t y,uint8_t w,uint8_t h,bool color=BLACK);
+	void 					drawCircle(uint8_t x0, uint8_t y0, uint16_t r,bool color=BLACK);
+	void 					fillCircle(uint8_t x0, uint8_t y0, uint16_t r,bool color=BLACK);
+	void 					drawRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16_t r, bool color=BLACK);
+	void 					fillRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16_t r, bool color=BLACK);
+	void 					setFont(const unsigned char * fnt);
+	virtual size_t  		write(uint8_t);
 	#if defined(_DBG)
-	uint8_t			myDbg();
+	uint8_t					myDbg();
 	#endif
-	void 			invertBuffer();
+	void 					invert();
 protected:
 	uint8_t 				_width;//this can be different if rotation is set
 	uint8_t 				_height;//this can be different if rotation is set
@@ -162,14 +186,12 @@ private:
 	void 					setDbg(uint8_t data);
 	#endif
 	struct FontHeader {
-		uint16_t size;			//0
-		uint8_t fixedWidth;		//1
-		uint8_t height;			//2
-		uint8_t firstChar;		//3
-		uint8_t charCount;		//4
+		uint16_t 			size;			//0
+		uint8_t 			fixedWidth;		//1
+		uint8_t 			height;			//2
+		uint8_t 			firstChar;		//3
+		uint8_t 			charCount;		//4
 	};
-	//
-	//static void 			intFunction();
 };
 
 #endif

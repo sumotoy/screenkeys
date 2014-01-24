@@ -4,6 +4,7 @@
 #include <fonts/SystemFont5x7.h>//ok
 //#include <fonts/squarer10x11.h>//ok
 //#include <fonts/beatbox10x11.h>//ok
+//#include <fonts/beatbox10x11.h>//ok
 //#include <fonts/binBold10x8.h>//ok
 //#include <fonts/binReg10x9.h>//ok
 //#include <fonts/binSmall10x8.h>//ok
@@ -12,8 +13,13 @@
 //#include <fonts/block10x7.h>//ok
 #include <fonts/block10x7.h>//ok
 
+volatile uint8_t key = 0;
+/*
+#include "fonts/_default.h"//this is necessary, always!
+ #include "fonts/Arial__9.h"
+ */
 // definitions -------------------
-#define   SWITCHES            16
+#define   SWITCHES            8
 #define   CS_COMMON_PIN       10
 #define   START_ADRS          0x20
 #define   PRG_CLOCK_PIN       3
@@ -36,43 +42,68 @@ unsigned char exit_img[64] = {
   0xff, 0xff, 0xff, 0xff,
   0x04, 0x00, 0x00, 0x60,
   0x04, 0x00, 0x00, 0x40 }; 
-  
+
 /*
 No of switches / CS pin / start address / prg clock pin / en clock pin
-Master clock pin it's defined in the library
-*/
+ Master clock pin it's defined in the library
+ */
 LC16 lcdKeys(SWITCHES,CS_COMMON_PIN,START_ADRS,PRG_CLOCK_PIN,ENABLE_CLOCK);
 
 void setup(){
-  /*
+
   Serial.begin(9600);
-  while(!Serial);
+//  while (!Serial) {
+//    ; // wait for serial port to connect. Needed for Leonardo only
+//  }
   delay(2000);
-  */
+  Serial.println("started");
+//  if (lcdKeys.getError() > 0){
+//    Serial.println("error");
+//    Serial.println(lcdKeys.getError(),DEC);
+//  }
+
   lcdKeys.begin();//initialize all
+
   lcdKeys.setColor(0,BR_GREEN);//switch no,color
-//  lcdKeys.printImage(0,exit_img);//switch no,image
+  //  lcdKeys.printImage(0,exit_img);//switch no,image
+  //lcdKeys.setFont(&_default);
+  //lcdKeys.setFont(&Arial__9);
   //lcdKeys.setFont(SystemFont5x7);
   //lcdKeys.setFont(squarer10x11);
   lcdKeys.setFont(block10x7);
-//  delay(1000);
-//  lcdKeys.clear(0);
-//  lcdKeys.refresh(0);
+  //lcdKeys.setFont(minifont);
+  //  delay(1000);
+  //  lcdKeys.clear(0);
+  //  lcdKeys.refresh(0);
   //lcdKeys.fillRect(0,0,31,15,0);
   //lcdKeys.drawPixel(0,0);
   //lcdKeys.drawRect(0,0,31,15);
-lcdKeys.setCursor(1,1);
-lcdKeys.print("01");
-//  lcdKeys.drawRect(0,0,15,15);
-//  lcdKeys.drawRect(16,0,6,15);
-//  lcdKeys.fillRect(16,0,6,8);
-lcdKeys.invertBuffer();
+  lcdKeys.setCursor(1,1);
+  lcdKeys.print("ABC");
+  //  lcdKeys.drawRect(0,0,15,15);
+  //  lcdKeys.drawRect(16,0,6,15);
+  //  lcdKeys.fillRect(16,0,6,8);
+  //lcdKeys.invert();
   lcdKeys.refresh(0);
+//  lcdKeys.clear();
+//  lcdKeys.setCursor(1,1);
+//  lcdKeys.print("EFGH");
+//  lcdKeys.refresh(1);
+  //Serial.println("inited");
+ 
 }
 
 void loop() {
   if (lcdKeys.getError() > 0){
-    //Serial.println("error");
+//    Serial.println("error");
+//    Serial.println(lcdKeys.getError(),DEC);
   }
-
+  key = lcdKeys.keypressScan();
+  if (key < 255){
+    Serial.println(key,DEC);
+  }
 }
+
+
+
+
