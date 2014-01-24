@@ -60,7 +60,20 @@ Version history:
 	#define memcpy_P memcpy
 	static inline uint8_t pgm_read_byte(const void *addr) { return *((uint8_t *)addr); }
 #endif
-
+/*
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+........................... GPIO CONNECTIONS .............................
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+//---------------------------- 1 GPIO mode (8 switches)
+//all switches data to GPIO I/O Bank A
+//all switches SWA tied to GND, a pullup resistor of 10K to each pin of GPIO I/O Bank B and SWB tied to GPIO I/O Bank B
+//connect INT B pin from GPIO to a pullup resistor (10k) then connect to choosed Teensy3.1 INT pin (or use a level converter for Teensy3.0)
+//---------------------------- Multiple GPIO mode (>8 to 64 switches)
+//if 4 GPIO connected, 2 GPIO dedicated to DATA e 2 to Switches (32 switches total)
+//First 2 GPIO are for DATA
+//3rd and 4rth are for switches scan, connect a 10K resistor pullup on each GPIO pin to avoid noise influence.
+//connect INT A pin of GPIO 3 and GPIO 4 together and a pullup resistor (10K), then connect to choosed Teensy3.1 INT pin (or use a level converter for Teensy3.0)
 /*
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ........................... SETUP .............................
@@ -172,6 +185,7 @@ protected:
 	uint8_t 				_buffer[64];
 	uint8_t					_bufferAddressing;
 	const unsigned char * 	_font;
+	uint8_t					_switches;
 	#if defined(_DBG)
 	uint8_t					_dbg;
 	#endif

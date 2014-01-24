@@ -18,6 +18,7 @@ screenkeys::screenkeys()
 	_foreground = BLACK;
 	_background = WHITE;
 	_wrap = true;
+	_switches = 0;
 	clearBuffer();
 	//_bufferAddressing = DEFAULT_BUFFER_ADDRESSING;
 	#if defined(_DBG)

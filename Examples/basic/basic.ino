@@ -51,12 +51,12 @@ LC16 lcdKeys(SWITCHES,CS_COMMON_PIN,START_ADRS,PRG_CLOCK_PIN,ENABLE_CLOCK);
 
 void setup(){
 
-  Serial.begin(9600);
+  //Serial.begin(9600);
 //  while (!Serial) {
 //    ; // wait for serial port to connect. Needed for Leonardo only
 //  }
-  delay(2000);
-  Serial.println("started");
+  //delay(2000);
+  //Serial.println("started");
 //  if (lcdKeys.getError() > 0){
 //    Serial.println("error");
 //    Serial.println(lcdKeys.getError(),DEC);
@@ -68,9 +68,9 @@ void setup(){
   //  lcdKeys.printImage(0,exit_img);//switch no,image
   //lcdKeys.setFont(&_default);
   //lcdKeys.setFont(&Arial__9);
-  //lcdKeys.setFont(SystemFont5x7);
+  lcdKeys.setFont(SystemFont5x7);
   //lcdKeys.setFont(squarer10x11);
-  lcdKeys.setFont(block10x7);
+  //lcdKeys.setFont(block10x7);
   //lcdKeys.setFont(minifont);
   //  delay(1000);
   //  lcdKeys.clear(0);
@@ -100,7 +100,12 @@ void loop() {
   }
   key = lcdKeys.keypressScan();
   if (key < 255){
-    Serial.println(key,DEC);
+    lcdKeys.clear();
+    lcdKeys.setCursor(1,1);
+    lcdKeys.print("S:");
+    lcdKeys.print(key,DEC);
+    lcdKeys.refresh(0);
+    //Serial.println(key,DEC);
   }
 }
 

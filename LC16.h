@@ -80,31 +80,47 @@ private:
 #elif SWITCHLIMIT > 8 && SWITCHLIMIT < 17 //9..16
 	mcp23s17		mcp2;
 	#define		SWGPIOS		2
+	#ifndef __USEEXTCLK
 	mcp23s17 _gpios_out[SWGPIOS/2] = {mcp1};
 	mcp23s17 _gpios_in [SWGPIOS/2] = {mcp2};
+	#else
+	mcp23s17 _gpios_out[SWGPIOS] = {mcp1,mcp2};
+	#endif
 #elif SWITCHLIMIT > 16 && SWITCHLIMIT < 25//17..24
 	mcp23s17		mcp2;
 	mcp23s17		mcp3;
 	mcp23s17		mcp4;
-	#define		SWGPIOS		4//for semplicity, should 3
+	#define		SWGPIOS		4//for semplicity, should be 3
+	#ifndef __USEEXTCLK
 	mcp23s17 _gpios_out[SWGPIOS/2] = {mcp1,mcp2};
 	mcp23s17 _gpios_in [SWGPIOS/2] = {mcp3,mcp4};
+	#else
+	mcp23s17 _gpios_out[SWGPIOS] = {mcp1,mcp2,mcp3,mcp4};
+	#endif
 #elif SWITCHLIMIT > 24 && SWITCHLIMIT < 33//25..32
 	mcp23s17		mcp2;
 	mcp23s17		mcp3;
 	mcp23s17		mcp4;
 	#define		SWGPIOS		4
+	#ifndef __USEEXTCLK
 	mcp23s17 _gpios_out[SWGPIOS/2] = {mcp1,mcp2};
 	mcp23s17 _gpios_in [SWGPIOS/2] = {mcp3,mcp4};
+	#else
+	mcp23s17 _gpios_out[SWGPIOS] = {mcp1,mcp2,mcp3,mcp4};
+	#endif
 #elif SWITCHLIMIT > 32 && SWITCHLIMIT < 41//33..40
 	mcp23s17		mcp2;
 	mcp23s17		mcp3;
 	mcp23s17		mcp4;
 	mcp23s17		mcp5;
 	mcp23s17		mcp6;
-	#define		SWGPIOS		6//for semplicity, should 5
+	#define		SWGPIOS		6//for semplicity, should be 5
+	#ifndef __USEEXTCLK
 	mcp23s17 _gpios_out[SWGPIOS/2] = {mcp1,mcp2,mcp3};
 	mcp23s17 _gpios_in [SWGPIOS/2] = {mcp4,mcp5,mcp6};
+	#else
+	mcp23s17 _gpios_out[SWGPIOS] = {mcp1,mcp2,mcp3,mcp4,mcp5,mcp6};
+	#endif
 #elif SWITCHLIMIT > 40 && SWITCHLIMIT < 49//41..48
 	mcp23s17		mcp2;
 	mcp23s17		mcp3;
@@ -112,8 +128,12 @@ private:
 	mcp23s17		mcp5;
 	mcp23s17		mcp6;
 	#define		SWGPIOS		6
+	#ifndef __USEEXTCLK
 	mcp23s17 _gpios_out[SWGPIOS/2] = {mcp1,mcp2,mcp3};
 	mcp23s17 _gpios_in [SWGPIOS/2] = {mcp4,mcp5,mcp6};
+	#else
+	mcp23s17 _gpios_out[SWGPIOS] = {mcp1,mcp2,mcp3,mcp4,mcp5,mcp6};
+	#endif
 #elif SWITCHLIMIT > 48 && SWITCHLIMIT < 57//49..56
 	mcp23s17		mcp2;
 	mcp23s17		mcp3;
@@ -122,9 +142,13 @@ private:
 	mcp23s17		mcp6;
 	mcp23s17		mcp7;
 	mcp23s17		mcp8;
-	#define		SWGPIOS		8//for semplicity, should 7
+	#define		SWGPIOS		8//for semplicity, should be 7
+	#ifndef __USEEXTCLK
 	mcp23s17 _gpios_out[SWGPIOS/2] = {mcp1,mcp2,mcp3,mcp4};
 	mcp23s17 _gpios_in [SWGPIOS/2] = {mcp5,mcp6,mcp7,mcp8};
+	#else
+	mcp23s17 _gpios_out[SWGPIOS] = {mcp1,mcp2,mcp3,mcp4,mcp5,mcp6,mcp7,mcp8};
+	#endif
 #elif SWITCHLIMIT > 56 && SWITCHLIMIT < 65//57..64
 	mcp23s17		mcp2;
 	mcp23s17		mcp3;
@@ -134,8 +158,12 @@ private:
 	mcp23s17		mcp7;
 	mcp23s17		mcp8;
 	#define		SWGPIOS		8
+	#ifndef __USEEXTCLK
 	mcp23s17 _gpios_out[SWGPIOS/2] = {mcp1,mcp2,mcp3,mcp4};
 	mcp23s17 _gpios_in [SWGPIOS/2] = {mcp5,mcp6,mcp7,mcp8};
+	#else
+	mcp23s17 _gpios_out[SWGPIOS] = {mcp1,mcp2,mcp3,mcp4,mcp5,mcp6,mcp7,mcp8};
+	#endif
 #else
 	#define		SWGPIOS		0
 	#error 		You must specify a range between 1 to 64!

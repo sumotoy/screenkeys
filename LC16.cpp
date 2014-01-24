@@ -16,6 +16,7 @@ LC16::LC16(const uint8_t switches,const uint8_t csPin,const uint8_t startAdrs,co
 	_cursor_y = 0;
 	_textsize = 1;
 	_rotation = 0;
+	_switches = switches;
 	_wrap = true;
 	_cs = csPin;
 	if (startAdrs >= 0x20 && startAdrs <= 0x26){//HAEN works between 0x20...0x27, reserve 1 for keyscan
@@ -45,63 +46,70 @@ LC16::LC16(const uint8_t switches,const uint8_t csPin,const uint8_t startAdrs,co
 //this initialize all GPIO's chip and prepare hardware for being used
 void LC16::begin(bool protocolInitOverride) {
 	if (_error == 0){
-		pinMode(_programClock,OUTPUT);
-		pinMode(_clockEnable,OUTPUT);
-		digitalWrite(_programClock,HIGH);
-		digitalWrite(_clockEnable,HIGH);
-		//GPIO's setup
-		//now set the direction for each GPIO
-		#if SWGPIOS < 2 //in this case only, half GPIO will be used for switches
-			_gpios_out[0].postSetup(_cs,_adrs);
-			_gpios_out[0].begin(protocolInitOverride);
-			#ifndef EXTSWITCH
-				_gpios_out[0].gpioRegisterWriteByte(_gpios_out[0].IOCON,0b00101000);//set conf
-				_gpios_out[0].gpioPinMode(0b1111111100000000);//set in/out direction
-				_gpios_out[0].gpioRegisterWriteWord(_gpios_out[0].GPPU,0b1111111100000000);//set pullup on Bank B (use pullup command?)
-				_gpios_out[0].gpioRegisterWriteWord(_gpios_out[0].IPOL,0b1111111100000000);// invert polarity bank B
-				_gpios_out[0].gpioRegisterWriteWord(_gpios_out[0].GPINTEN,0b1111111100000000);// enable all interrupt in Bank B
-				_gpios_out[0].gpioRegisterRead(_gpios_out[0].INTCAP+1);// read from interrupt B, capture ports to clear them
-				pinMode (INTpin, INPUT);
-				digitalWrite (INTpin, HIGH);
-				enableKeyInt(keypress);
-				_keyPressed = false;
-				
-			#else
-			#endif
-			delay(100);
-			_gpios_out[0].gpioPinMode(0b1111111100000000);//A=OUT,B=IN
-			_gpios_out[0].gpioPort(0xFFFF);
-			
-		#else
-			for (uint8_t i=0;i<(SWGPIOS/2);i++){//set outs
-				_gpios_out[i].postSetup(_cs,_adrs+(1*i));//20,21,22,23.
-				_gpios_out[i].begin(protocolInitOverride);
-				delay(100);
-				_gpios_out[i].gpioPinMode(OUTPUT);
-				_gpios_out[i].gpioPort(0xFFFF);
-			}
-			#ifndef EXTSWITCH
-				for (uint8_t i=0;i<(SWGPIOS/2);i++){//set ins
-					_gpios_in[i].postSetup(_cs,_adrs+(SWGPIOS/2)+(1*i));//24,25,26,27.
-					_gpios_in[i].begin(protocolInitOverride);
-					delay(100);
-					_gpios_in[i].gpioPinMode(INPUT);
-					//_gpios_in[i].gpioPort(0xFFFF);//
-				}
-			#endif	
-		#endif
-		//mcp1.postSetup(_cs,_adrs);
-		//mcp1.begin(protocolInitOverride);
-		//delay(100);
-		//mcp1.gpioPinMode(OUTPUT);
-		//mcp1.gpioPort(0xFFFF);
-		//---------------------------------------------
+		uint8_t i;
+		pinMode(_programClock,OUTPUT);//set port direction
+		pinMode(_clockEnable,OUTPUT);//set port direction
+		digitalWrite(_programClock,HIGH);//pullup
+		digitalWrite(_clockEnable,HIGH);//pullup
+		//Are we using the internal clock generator or an external one?
 		#ifndef __USEEXTCLK
-			pinMode(_mainClock,OUTPUT);
+			pinMode(_mainClock,OUTPUT);//set direction
 			analogWriteFrequency(_mainClock, CLK_FRQ);
 			analogWrite(_mainClock,120);//in my system this give me a resonable balanced squarewave(400Khz)
 		#endif
-		init_lcdChip(0);
+		//GPIO's setup, check how many GPIO's and how configured
+		#if SWGPIOS < 2 //in this case only, half GPIO can be used for switches
+			_gpios_out[0].postSetup(_cs,_adrs);
+			_gpios_out[0].begin(protocolInitOverride);
+			#ifndef EXTSWITCH//Using internal switch scan so BankA as Out and BankB as IN
+				_gpios_out[0].gpioRegisterWriteByte(_gpios_out[0].IOCON,0b00101000);//set conf
+				_gpios_out[0].gpioPinMode(0b1111111100000000);//set in/out direction A=OUT,B=IN
+				_gpios_out[0].gpioRegisterWriteWord(_gpios_out[0].GPPU,0b1111111100000000);//set pullup on Bank B (use pullup command? will check later)
+				_gpios_out[0].gpioRegisterWriteWord(_gpios_out[0].IPOL,0b1111111100000000);// invert polarity bank B
+				_gpios_out[0].gpioRegisterWriteWord(_gpios_out[0].GPINTEN,0b1111111100000000);// enable interrupt in Bank B for all bank B ins
+				_gpios_out[0].gpioRegisterRead(_gpios_out[0].INTCAP+1);// read from interrupt B, capture ports to clear them
+				pinMode(INTpin, INPUT);//set direction for MCU INT pin
+				digitalWrite(INTpin, HIGH);//PullUp it
+				enableKeyInt(keypress);//enable Interrupt routine and set the fallback function
+				_keyPressed = false;
+			#else//Not using switch scan(16 switches in this mode since we using all chip for this)
+				_gpios_out[0].gpioPinMode(OUTPUT);//A=OUT,B=OUT
+				_gpios_out[0].gpioPort(0xFFFF);//pullup
+			#endif
+			delay(10);
+		#else //more than 1 GPIO
+			#ifndef EXTSWITCH//this mode divide GPIO's in 2 block of chips, first half for OUT and second half for IN
+				for (i=0;i<(SWGPIOS/2);i++){//first half, GPIO's as OUT
+					_gpios_out[i].postSetup(_cs,_adrs+(1*i));//20,21,22,23.
+					_gpios_out[i].begin(protocolInitOverride);
+					_gpios_out[i].gpioPinMode(OUTPUT);//A=OUT,B=OUT
+					_gpios_out[i].gpioPort(0xFFFF);//pullup
+				}
+				for (i=0;i<(SWGPIOS/2);i++){//second half, GPIO's as IN
+					_gpios_in[i].postSetup(_cs,_adrs+(SWGPIOS/2)+(1*i));//24,25,26,27.
+					_gpios_in[i].begin(protocolInitOverride);
+					_gpios_in[i].gpioPinMode(INPUT);//A=IN,B=IN
+					// Now special initializations for set as scanners (begin here)
+					// TODO
+				}
+				pinMode(INTpin, INPUT);//set direction of INT pin for MCU
+				digitalWrite(INTpin, HIGH);//pullup
+				enableKeyInt(keypress);//enable Interrupt routine and set the fallback function
+				_keyPressed = false;
+			#else//not using internal switch scan, all GPIO's used for SW DATA
+				for (i=0;i<(SWGPIOS);i++){//for each GPIO
+					_gpios_out[i].postSetup(_cs,_adrs+(1*i));//20,21,22,23,24,etc.
+					_gpios_out[i].begin(protocolInitOverride);
+					_gpios_out[i].gpioPinMode(OUTPUT);//set direction
+					_gpios_out[i].gpioPort(0xFFFF);//pullup
+				}
+			#endif	
+			delay(10);
+		#endif// end 1/many GPIO
+		//now the MCU has full control of GPIO's and Clock logic, we can initialize Screenkeys modules
+		for (i=0;i<_switches;i++){
+			init_lcdChip(i);//init each switch
+		}
 	}
 }
 
@@ -225,8 +233,7 @@ void LC16::init_lcdChip(uint8_t key){
   clear();
   refresh(key);
   setColor(key,BL_NONE);
-  
-  delay(100);
+  delay(10);
 }
 
 //this send to the LC16 a raw content
@@ -274,21 +281,22 @@ void LC16::keypress(){
 
 uint8_t LC16::keypressScan(){
 	if (_keyPressed){
-		disableKeyInt();
+		disableKeyInt();//prevent an interrupt, disable
 		uint8_t val = 0;
 		delay(30);  // de-bounce before we re-enable interrupts
-		#if SWGPIOS < 2
+		#if SWGPIOS < 2//special case, just one GPIO
 		if (_gpios_out[0].gpioRegisterRead(_gpios_out[0].INTF+1)) val |= _gpios_out[0].gpioRegisterRead(_gpios_out[0].INTCAP+1);
 		for (uint8_t sw = 0; sw < 8; sw++) {
 			if (val & (1 << sw)){
 				_keyPressed = false;
-				enableKeyInt(keypress);
+				enableKeyInt(keypress);//enable again interrupt
 				return sw;
 			}
 		}
-		#else
+		#else//Multiple GPIO
+		// TODO
 		#endif
-		enableKeyInt(keypress);
+		enableKeyInt(keypress);//enable again interrupt
 		_keyPressed = false;
 		return 255;
 	} else {
