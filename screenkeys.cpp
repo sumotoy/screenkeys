@@ -461,7 +461,3 @@ uint8_t screenkeys::charWidth(unsigned char c) {
 	return width;
 }
 
-/*
-static void screenkeys::intFunction() {
-}
-*/

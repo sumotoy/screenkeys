@@ -166,7 +166,7 @@ private:
 	#define		SWGPIOS		0
 	#error 		You must specify a range between 1 to 64!
 #endif
-	void 				progEnable(boolean mode);
+	//void 				progEnable(boolean mode);
 	void 				PClock(uint8_t cTicks);
 	void 				sendData(uint8_t key,unsigned char cDataByte, unsigned char cParity);
 	void 				sendByte(uint8_t key,byte reg,byte val);

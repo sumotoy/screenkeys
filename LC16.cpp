@@ -126,23 +126,15 @@ void LC16::PClock(uint8_t cTicks){
   uint8_t i;
   for(i = 0; i < cTicks; i++) {
     digitalWriteFast(_programClock,LOW);//CLK_toggle
-    //delayMicroseconds(10);
     digitalWriteFast(_programClock,HIGH);//CLK_toggle
-    //delayMicroseconds(10);
   }
 } 
 
+/*
 void LC16::progEnable(boolean mode){
 	digitalWriteFast(_clockEnable,!mode);
-	/*
-  if (mode){
-    digitalWriteFast(_clockEnable,LOW);
-  } 
-  else {
-    digitalWriteFast(_clockEnable,HIGH);
-  }
-  */
 }
+*/
 
 void LC16::_sendGpio(uint8_t chip,uint16_t data){
 	#if SWGPIOS > 1
@@ -177,7 +169,8 @@ uint8_t LC16::_witchGpio(uint8_t key){
 void LC16::sendData(uint8_t key,unsigned char cDataByte, unsigned char cParity){
 	uint8_t chip = _witchGpio(key);//calculate once witch GPIO chip it's needed
 	if (chip == 255) return;//out of range, terminate now
-	progEnable(true);//disconnect main clock
+	digitalWriteFast(_clockEnable,LOW);
+	//progEnable(true);//disconnect main clock
 	unsigned char i, cBit;
 	uint16_t temp = 0xFFFF;
 	//Calculate parity for this databyte type cParity = 0 => even parity (start/end byte) = 1 => odd parity (command/data byte)
@@ -209,7 +202,8 @@ void LC16::sendData(uint8_t key,unsigned char cDataByte, unsigned char cParity){
 	PClock(1) ;
 	_sendGpio(chip,temp);
 	PClock(1) ;
-	progEnable(false);//reconnect main clock
+	digitalWriteFast(_clockEnable,HIGH);
+	//progEnable(false);//reconnect main clock
 } 
 
 
@@ -283,11 +277,12 @@ void LC16::keypress(){
 
 
 //keyscan (no multiple press version)
+//give back 255 if no button pressed or the number of button pressed
 uint8_t LC16::keypressScan(){
 	if (_keyPressed){
 		disableKeyInt();//prevent an interrupt, disable
 		delay(30);  // de-bounce before we re-enable interrupts
-		#if SWGPIOS < 2//special case, just one GPIO
+		#if SWGPIOS < 2//special case, just one GPIO (tested, works)
 		uint8_t val = 0;
 		if (_gpios_out[0].gpioRegisterRead(_gpios_out[0].INTF+1)) {
 			val |= _gpios_out[0].gpioRegisterRead(_gpios_out[0].INTCAP+1);
@@ -299,7 +294,7 @@ uint8_t LC16::keypressScan(){
 				}
 			}
 		}
-		#else//Multiple GPIO
+		#else//Multiple GPIO (not tested)
 			uint16_t val = 0;
 			for (i=0;i<(SWGPIOS/2);i++){//second half, GPIO's as IN
 				if (_gpios_in[i].gpioRegisterRead(_gpios_in[i].INTF)) {
