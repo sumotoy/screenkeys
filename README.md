@@ -12,7 +12,7 @@ First 2 problems: they uses syncronous programming and clock needs to be constan
 Another headache it's the protocol, easy, but uses a weird parity bit that need to be constantly calculated and can be even or odd (depends of the command)<br>
 The last problem it's how to manage many of these little beasts without dedicate tons of hardware and microcontroller resources.<br><br>
 Taked a look around...Just one guy writed something barely usable but works only for a button, code was more an experiment and refresh frequency was so low that the key will be damaged in less than one year.<br><br>
-The company has some documentation based on old microcontrollers and uses shift registers that I'm try to avoid because they easily inject interferences in audio.<br>
+The company has some documentation based on old microcontrollers and uses shift registers that I'm try to avoid because they easily inject interferences in audio and they designed for old era microprocessors so they still use a lot of pins!<br>
 I got some hundreds of these keys from an auction so I decided to design something.<br>
 
 <b>Hardware Design:</b><br>
