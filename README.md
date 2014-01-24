@@ -12,7 +12,7 @@ First 2 problems: they uses syncronous programming and clock needs to be constan
 Another headache it's the protocol, easy, but uses a weird parity bit that need to be constantly calculated and can be even or odd (depends of the command)<br>
 The last problem it's how to manage many of these little beasts without dedicate tons of hardware and microcontroller resources.<br><br>
 Taked a look around...Just one guy writed something barely usable but works only for a button, code was more an experiment and refresh frequency was so low that the key will be damaged in less than one year.<br><br>
-The company has some documentation based on old microcontrollers and uses shift registers that I'm try to avoid because they easily inject interferences in audio.<br>
+The company has some documentation based on old microcontrollers and uses shift registers that I'm try to avoid because they easily inject interferences in audio and they designed for old era microprocessors so they still use a lot of pins!<br>
 I got some hundreds of these keys from an auction so I decided to design something.<br>
 
 <b>Hardware Design:</b><br>
@@ -82,19 +82,19 @@ It's clear obvius that you cannot refresh all buttons in one time but you need t
 
 <b>Development Status:</b><br>
 
-<b>0.5b8:</b>
+<b>0.6b1:</b>
 
  - [x] Screenkey low level routines.
  - [x] Graphic routines.
  - [x] Text routines.
  - [x] 64 Screenkeys addressing.
- - [d] Switch Scan routines. (with this beta only 1 GPIO mode, aka 8 switches)
+ - [d] Switch Scan routines. working 1 GPIO mode, not tested multiple GPIO mode
 
 
 
 For commercial purposes and licence questions please contact me.(sumotoy < at > gmail.com)
 ![image](http://i1189.photobucket.com/albums/z437/theamra/libraries/lc16_design.jpg "LC16")<br>
 This is the 16 switch board.<br>
-This board has all the needed electronics onboard and works with Teensy3.0 as well Teensy3.1. Has internal level converters and IDC 10 pin connector to expand in bloks of 16 switches by using the same wires with teensy. The expansions has less chip needed since this one mounts level converters and oscillator logic that it's common to all boards so they need only 2 GPIO's extra for each 16 switches.<br>
+This board has all the needed electronics and works with Teensy3.0 as well Teensy3.1, it has been designed to use DIP ic's so it's easy to buildup. Has internal level converters and IDC 10 pin connector to expand in bloks of 16 switches by shared the same wires. The expansions has less chips since this one mounts level converters and oscillator logic that it's common to all boards so they need only 2 GPIO's extra for every 16 switches plus a buffer.<br>
 Other boards design, coming next, allow 8 inline buttons and are more compact but drivers are all mounted in a doughter board and all components are SMD.
 
