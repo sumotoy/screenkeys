@@ -88,9 +88,12 @@ void LC16::begin(bool protocolInitOverride) {
 				for (i=0;i<(SWGPIOS/2);i++){//second half, GPIO's as IN
 					_gpios_in[i].postSetup(_cs,_adrs+(SWGPIOS/2)+(1*i));//24,25,26,27.
 					_gpios_in[i].begin(protocolInitOverride);
+					_gpios_in[i].gpioRegisterWriteByte(_gpios_in[i].IOCON,0b00101000);//set conf
 					_gpios_in[i].gpioPinMode(INPUT);//A=IN,B=IN
-					// Now special initializations for set as scanners (begin here)
-					// TODO
+					_gpios_in[i].gpioRegisterWriteWord(_gpios_in[i].GPPU,0xFFFF);//set pullup on all pins (use pullup command? will check later)
+					_gpios_in[i].gpioRegisterWriteWord(_gpios_in[i].IPOL,0xFFFF);// invert polarity in all pins
+					_gpios_in[i].gpioRegisterWriteWord(_gpios_in[i].GPINTEN,0xFFFF);// enable interrupt for all pins
+					_gpios_in[i].gpioRegisterRead(_gpios_in[i].INTCAP);// read from interrupt, capture ports to clear them
 				}
 				pinMode(INTpin, INPUT);//set direction of INT pin for MCU
 				digitalWrite(INTpin, HIGH);//pullup
@@ -279,22 +282,37 @@ void LC16::keypress(){
 }
 
 
+//keyscan (no multiple press version)
 uint8_t LC16::keypressScan(){
 	if (_keyPressed){
 		disableKeyInt();//prevent an interrupt, disable
-		uint8_t val = 0;
 		delay(30);  // de-bounce before we re-enable interrupts
 		#if SWGPIOS < 2//special case, just one GPIO
-		if (_gpios_out[0].gpioRegisterRead(_gpios_out[0].INTF+1)) val |= _gpios_out[0].gpioRegisterRead(_gpios_out[0].INTCAP+1);
-		for (uint8_t sw = 0; sw < 8; sw++) {
-			if (val & (1 << sw)){
-				_keyPressed = false;
-				enableKeyInt(keypress);//enable again interrupt
-				return sw;
+		uint8_t val = 0;
+		if (_gpios_out[0].gpioRegisterRead(_gpios_out[0].INTF+1)) {
+			val |= _gpios_out[0].gpioRegisterRead(_gpios_out[0].INTCAP+1);
+			for (uint8_t sw = 0; sw < 8; sw++) {
+				if (val & (1 << sw)){
+					_keyPressed = false;
+					enableKeyInt(keypress);//enable again interrupt
+					return sw;
+				}
 			}
 		}
 		#else//Multiple GPIO
-		// TODO
+			uint16_t val = 0;
+			for (i=0;i<(SWGPIOS/2);i++){//second half, GPIO's as IN
+				if (_gpios_in[i].gpioRegisterRead(_gpios_in[i].INTF)) {
+					val |= _gpios_in[i].gpioRegisterRead(_gpios_in[i].INTCAP);
+					for (uint8_t sw = 0; sw < 16; sw++) {
+						if (val & (1 << sw)){
+							_keyPressed = false;
+							enableKeyInt(keypress);//enable again interrupt
+							return sw+(i*16);
+						}
+					}
+				}
+			}
 		#endif
 		enableKeyInt(keypress);//enable again interrupt
 		_keyPressed = false;

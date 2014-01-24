@@ -8,7 +8,7 @@
 	screenkeys - A Library & Hardware (For Teensy3.x) for drive 1..64 LCD ScreenKeys buttons with few wires
 ---------------------------------------------------------------------------------------------------------------------
 Version history:
-0.5b8
+0.6b1
 ---------------------------------------------------------------------------------------------------------------------
 		Copyright (c) 2014, s.u.m.o.t.o.y [sumotoy(at)gmail.com]
 ---------------------------------------------------------------------------------------------------------------------
@@ -30,7 +30,7 @@ Version history:
 	Small code portions from Adafruit (Adafruit_GFX).
 	https://github.com/adafruit/Adafruit-GFX-Library
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	Version:0.5b8
+	Version:0.6b1
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	Attention! This library needs sumotoy gpio_expander library
 	https://github.com/sumotoy/gpio_expander
@@ -166,9 +166,9 @@ public:
 	void 					fillRoundRect(uint8_t x, uint8_t y, uint8_t w,uint8_t h, uint16_t r, bool color=BLACK);
 	void 					setFont(const unsigned char * fnt);
 	virtual size_t  		write(uint8_t);
-	#if defined(_DBG)
+#if defined(_DBG)
 	uint8_t					myDbg();
-	#endif
+#endif
 	void 					invert();
 protected:
 	uint8_t 				_width;//this can be different if rotation is set
@@ -186,9 +186,9 @@ protected:
 	uint8_t					_bufferAddressing;
 	const unsigned char * 	_font;
 	uint8_t					_switches;
-	#if defined(_DBG)
+#if defined(_DBG)
 	uint8_t					_dbg;
-	#endif
+#endif
 private:
 	void 					drawCircleHelper(uint8_t x0,uint8_t y0,uint8_t r,uint8_t cornername,bool color);
 	void 					fillCircleHelper(uint8_t x0, uint8_t y0, uint16_t r, uint8_t cornername, int16_t delta, bool color);
@@ -196,9 +196,9 @@ private:
 	uint8_t 				charWidth(unsigned char c);
 	void					clearBuffer();
 	
-	#if defined(_DBG)
+#if defined(_DBG)
 	void 					setDbg(uint8_t data);
-	#endif
+#endif
 	struct FontHeader {
 		uint16_t 			size;			//0
 		uint8_t 			fixedWidth;		//1

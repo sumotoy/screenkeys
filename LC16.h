@@ -40,27 +40,25 @@ public:
 	void 					fill(uint8_t color);
 	void 					clear();
 	uint8_t					getError();
-	#ifndef EXTSWITCH
+#ifndef EXTSWITCH
 	uint8_t					keypressScan();
     void 					enableKeyInt(void (*isr)()) __attribute__((always_inline)) {
-		//isrCallback = isr;
 		attachInterrupt(INTused,*isr,FALLING);
     }
     void 					disableKeyInt() __attribute__((always_inline)) {
 		detachInterrupt(INTused);
     }
-	//void (*isrCallback)();
 	static void				keypress();
-	#endif
+#endif
 protected:
-	#ifndef EXTSWITCH
+#ifndef EXTSWITCH
 	static volatile  bool 	_keyPressed;
-	#endif
+#endif
 private:
     uint8_t 				_cs;
-	#ifndef __USEEXTCLK
+#ifndef __USEEXTCLK
 	uint8_t 				_mainClock;
-	#endif
+#endif
 	uint8_t 				_programClock;
 	uint8_t 				_clockEnable;
 	uint8_t 				_adrs;
@@ -174,6 +172,5 @@ private:
 	void 				sendByte(uint8_t key,byte reg,byte val);
 	void 				sendWord(uint8_t key,byte reg,byte val1,byte val2);
 	void 				init_lcdChip(uint8_t key);
-
 };
 #endif
