@@ -68,7 +68,7 @@ void LC16::begin(bool protocolInitOverride) {
 				_gpios_out[0].gpioRegisterWriteWord(_gpios_out[0].GPPU,0b1111111100000000);//set pullup on Bank B (use pullup command? will check later)
 				_gpios_out[0].gpioRegisterWriteWord(_gpios_out[0].IPOL,0b1111111100000000);// invert polarity bank B
 				_gpios_out[0].gpioRegisterWriteWord(_gpios_out[0].GPINTEN,0b1111111100000000);// enable interrupt in Bank B for all bank B ins
-				_gpios_out[0].gpioRegisterRead(_gpios_out[0].INTCAP+1);// read from interrupt B, capture ports to clear them
+				_gpios_out[0].gpioRegisterReadByte(_gpios_out[0].INTCAP+1);// read from interrupt B, capture ports to clear them
 				pinMode(INTpin, INPUT);//set direction for MCU INT pin
 				digitalWrite(INTpin, HIGH);//PullUp it
 				enableKeyInt(keypress);//enable Interrupt routine and set the fallback function
@@ -290,8 +290,8 @@ uint8_t LC16::keypressScan(){
 		delay(30);  // de-bounce before we re-enable interrupts
 		#if SWGPIOS < 2//special case, just one GPIO (tested, works)
 		uint8_t val = 0;
-		if (_gpios_out[0].gpioRegisterRead(_gpios_out[0].INTF+1)) {
-			val |= _gpios_out[0].gpioRegisterRead(_gpios_out[0].INTCAP+1);
+		if (_gpios_out[0].gpioRegisterReadByte(_gpios_out[0].INTF+1)) {
+			val |= _gpios_out[0].gpioRegisterReadByte(_gpios_out[0].INTCAP+1);
 			for (uint8_t sw = 0; sw < 8; sw++) {
 				if (val & (1 << sw)){
 					_keyPressed = false;
@@ -303,8 +303,8 @@ uint8_t LC16::keypressScan(){
 		#else//Multiple GPIO (not tested)
 			uint16_t val = 0;
 			for (i=0;i<(SWGPIOS/2);i++){//second half, GPIO's as IN
-				if (_gpios_in[i].gpioRegisterRead(_gpios_in[i].INTF)) {
-					val |= _gpios_in[i].gpioRegisterRead(_gpios_in[i].INTCAP);
+				if (_gpios_in[i].gpioRegisterReadWord(_gpios_in[i].INTF)) {
+					val |= _gpios_in[i].gpioRegisterReadWord(_gpios_in[i].INTCAP);
 					for (uint8_t sw = 0; sw < 16; sw++) {
 						if (val & (1 << sw)){
 							_keyPressed = false;
